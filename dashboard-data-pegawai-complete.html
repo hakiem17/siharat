@@ -354,6 +354,105 @@
         .sort-icon {
             opacity: 1 !important;
         }
+
+        /* Drag and Drop Styles */
+        .drag-handle {
+            cursor: grab;
+            color: #6b7280;
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+        }
+
+        .drag-handle:hover {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .drag-over {
+            border-top: 3px solid var(--primary-color);
+            background-color: rgba(30, 64, 175, 0.1);
+        }
+
+        .drag-placeholder {
+            height: 60px;
+            background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+            border-radius: 4px;
+            margin: 2px 0;
+            opacity: 0.7;
+        }
+
+        .table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .table tbody tr.drag-over {
+            border-top: 3px solid var(--primary-color);
+            background-color: rgba(30, 64, 175, 0.1);
+        }
+
+        .drag-indicator {
+            position: absolute;
+            left: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 20px;
+            background: var(--primary-color);
+            border-radius: 2px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .table tbody tr:hover .drag-indicator {
+            opacity: 1;
+        }
+
+        .drag-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .drag-up, .drag-down {
+            width: 20px;
+            height: 20px;
+            border: none;
+            background: #f3f4f6;
+            color: #6b7280;
+            border-radius: 3px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .drag-up:hover, .drag-down:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .drag-up:disabled, .drag-down:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -500,13 +599,14 @@
                     <thead>
                         <tr>
                             <th width="5%">No.</th>
-                            <th width="20%" data-column="name" onclick="sortTable('name')" style="cursor: pointer;">
+                            <th width="5%">Urutan</th>
+                            <th width="18%" data-column="name" onclick="sortTable('name')" style="cursor: pointer;">
                                 Nama <i class="fas fa-sort" style="margin-left: 5px;"></i>
                             </th>
                             <th width="15%" data-column="nip" onclick="sortTable('nip')" style="cursor: pointer;">
                                 NIP/NI PPPK <i class="fas fa-sort" style="margin-left: 5px;"></i>
                             </th>
-                            <th width="20%" data-column="position" onclick="sortTable('position')" style="cursor: pointer;">
+                            <th width="18%" data-column="position" onclick="sortTable('position')" style="cursor: pointer;">
                                 Jabatan <i class="fas fa-sort" style="margin-left: 5px;"></i>
                             </th>
                             <th width="15%" data-column="rank_class" onclick="sortTable('rank_class')" style="cursor: pointer;">
@@ -515,7 +615,7 @@
                             <th width="15%" data-column="division" onclick="sortTable('division')" style="cursor: pointer;">
                                 Bidang/Seksi <i class="fas fa-sort" style="margin-left: 5px;"></i>
                             </th>
-                            <th width="10%">Aksi</th>
+                            <th width="9%">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="employeesTableBody">
@@ -730,6 +830,8 @@
         let deletingEmployeeId = null;
         let sortColumn = null;
         let sortDirection = 'asc'; // 'asc' or 'desc'
+        let draggedElement = null;
+        let draggedIndex = null;
 
         // Configuration
         const appConfig = window.SIHARAT_CONFIG || {
@@ -1040,8 +1142,21 @@
                 `;
             } else {
                 tbody.innerHTML = pageData.map((employee, index) => `
-                    <tr>
+                    <tr draggable="true" data-employee-id="${employee.id}" data-original-index="${startIndex + index}">
                         <td>${startIndex + index + 1}</td>
+                        <td>
+                            <div class="drag-controls">
+                                <button class="drag-up" onclick="moveEmployeeUp('${employee.id}')" title="Pindah ke atas">
+                                    <i class="fas fa-chevron-up"></i>
+                                </button>
+                                <div class="drag-handle" title="Drag untuk mengubah urutan">
+                                    <i class="fas fa-grip-vertical"></i>
+                                </div>
+                                <button class="drag-down" onclick="moveEmployeeDown('${employee.id}')" title="Pindah ke bawah">
+                                    <i class="fas fa-chevron-down"></i>
+                                </button>
+                            </div>
+                        </td>
                         <td>
                             <div class="fw-bold">${employee.name}</div>
                             <small class="text-muted">${employee.employee_type}</small>
@@ -1072,6 +1187,11 @@
             }
 
             renderPagination();
+            
+            // Re-initialize drag and drop for new elements
+            setTimeout(() => {
+                initializeDragAndDrop();
+            }, 100);
         }
 
         function renderPagination() {
@@ -1504,10 +1624,126 @@
             }
         }
 
+        // Drag and Drop Functions
+        function initializeDragAndDrop() {
+            const tbody = document.getElementById('employeesTableBody');
+            
+            // Remove existing listeners to avoid duplicates
+            tbody.removeEventListener('dragstart', handleDragStart);
+            tbody.removeEventListener('dragend', handleDragEnd);
+            tbody.removeEventListener('dragover', handleDragOver);
+            tbody.removeEventListener('drop', handleDrop);
+            
+            // Add new listeners
+            tbody.addEventListener('dragstart', handleDragStart);
+            tbody.addEventListener('dragend', handleDragEnd);
+            tbody.addEventListener('dragover', handleDragOver);
+            tbody.addEventListener('drop', handleDrop);
+        }
+
+        function handleDragStart(e) {
+            draggedElement = e.target;
+            draggedIndex = Array.from(draggedElement.parentNode.children).indexOf(draggedElement);
+            draggedElement.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', draggedElement.outerHTML);
+        }
+
+        function handleDragEnd(e) {
+            draggedElement.classList.remove('dragging');
+            draggedElement = null;
+            draggedIndex = null;
+            
+            // Remove all drag-over classes
+            document.querySelectorAll('.drag-over').forEach(el => {
+                el.classList.remove('drag-over');
+            });
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            
+            const tbody = e.currentTarget;
+            const afterElement = getDragAfterElement(tbody, e.clientY);
+            const dragging = document.querySelector('.dragging');
+            
+            if (afterElement == null) {
+                tbody.appendChild(dragging);
+            } else {
+                tbody.insertBefore(dragging, afterElement);
+            }
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const draggedId = draggedElement.getAttribute('data-employee-id');
+            const newIndex = Array.from(draggedElement.parentNode.children).indexOf(draggedElement);
+            
+            if (draggedIndex !== newIndex) {
+                moveEmployeeInArray(draggedId, newIndex);
+                showAlert('Urutan pegawai berhasil diubah!', 'success', 3000);
+            }
+        }
+
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('tr[draggable]:not(.dragging)')];
+            
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        function moveEmployeeInArray(employeeId, newIndex) {
+            const currentIndex = filteredEmployees.findIndex(emp => emp.id === employeeId);
+            if (currentIndex === -1) return;
+            
+            const employee = filteredEmployees.splice(currentIndex, 1)[0];
+            filteredEmployees.splice(newIndex, 0, employee);
+            
+            // Update the main employees array as well
+            const mainIndex = employees.findIndex(emp => emp.id === employeeId);
+            if (mainIndex !== -1) {
+                const mainEmployee = employees.splice(mainIndex, 1)[0];
+                const newMainIndex = employees.findIndex(emp => emp.id === filteredEmployees[newIndex - 1]?.id);
+                employees.splice(newMainIndex + 1, 0, mainEmployee);
+            }
+            
+            renderTable();
+        }
+
+        function moveEmployeeUp(employeeId) {
+            const currentIndex = filteredEmployees.findIndex(emp => emp.id === employeeId);
+            if (currentIndex > 0) {
+                const employee = filteredEmployees.splice(currentIndex, 1)[0];
+                filteredEmployees.splice(currentIndex - 1, 0, employee);
+                renderTable();
+                showAlert('Pegawai dipindahkan ke atas!', 'success', 2000);
+            }
+        }
+
+        function moveEmployeeDown(employeeId) {
+            const currentIndex = filteredEmployees.findIndex(emp => emp.id === employeeId);
+            if (currentIndex < filteredEmployees.length - 1) {
+                const employee = filteredEmployees.splice(currentIndex, 1)[0];
+                filteredEmployees.splice(currentIndex + 1, 0, employee);
+                renderTable();
+                showAlert('Pegawai dipindahkan ke bawah!', 'success', 2000);
+            }
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             loadEmployees();
             setupFormValidation();
+            initializeDragAndDrop();
         });
     </script>
 </body>
