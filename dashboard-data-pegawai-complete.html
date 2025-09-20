@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Pegawai ASN - SI-HARAT</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #1e40af;
+            --secondary-color: #3b82f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #06b6d4;
+        }
+
+        body {
+            background-color: #f8fafc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .header-section {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid var(--primary-color);
+            transition: transform 0.2s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stats-card.success {
+            border-left-color: var(--success-color);
+        }
+
+        .stats-card.warning {
+            border-left-color: var(--warning-color);
+        }
+
+        .stats-card.info {
+            border-left-color: var(--info-color);
+        }
+
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .stats-icon.primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        }
+
+        .stats-icon.success {
+            background: linear-gradient(135deg, var(--success-color), #34d399);
+        }
+
+        .stats-icon.warning {
+            background: linear-gradient(135deg, var(--warning-color), #fbbf24);
+        }
+
+        .stats-icon.info {
+            background: linear-gradient(135deg, var(--info-color), #22d3ee);
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color), #34d399);
+            border: none;
+            border-radius: 8px;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning-color), #fbbf24);
+            border: none;
+            border-radius: 8px;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger-color), #f87171);
+            border: none;
+            border-radius: 8px;
+        }
+
+        .table {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .table thead th {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            font-weight: 600;
+            padding: 1rem;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .table thead th[data-column] {
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .table thead th[data-column]:hover {
+            background: #1e40af;
+        }
+
+        .table thead th i {
+            opacity: 0.7;
+            font-size: 0.8rem;
+        }
+
+        .table thead th[data-column]:hover i {
+            opacity: 1;
+        }
+
+        .table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-color: #e5e7eb;
+        }
+
+        .badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: linear-gradient(135deg, var(--success-color), #34d399);
+        }
+
+        .badge-warning {
+            background: linear-gradient(135deg, var(--warning-color), #fbbf24);
+        }
+
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+            padding: 0.75rem 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+        }
+
+        .modal-content {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 12px 12px 0 0;
+            border: none;
+        }
+
+        .modal-title {
+            font-weight: 600;
+        }
+
+        .btn-close {
+            filter: invert(1);
+        }
+
+        .loading {
+            display: none;
+        }
+
+        .loading.show {
+            display: inline-block;
+        }
+
+        .alert {
+            border-radius: 8px;
+            border: none;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            color: #065f46;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            color: #991b1b;
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            color: #92400e;
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, #cffafe, #a5f3fc);
+            color: #155e75;
+        }
+
+        .pagination {
+            justify-content: center;
+        }
+
+        .page-link {
+            border-radius: 8px;
+            margin: 0 2px;
+            border: 2px solid #e5e7eb;
+            color: var(--primary-color);
+        }
+
+        .page-link:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .page-item.active .page-link {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .filter-section {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .action-buttons .btn {
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 3rem;
+            color: #6b7280;
+        }
+
+        .no-data i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .required {
+            color: var(--danger-color);
+        }
+
+        .form-text {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .btn-group .btn {
+            border-radius: 8px;
+        }
+
+        .btn-group .btn:first-child {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .btn-group .btn:last-child {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+
+        .btn-group .btn:not(:first-child):not(:last-child) {
+            border-radius: 0;
+        }
+
+        /* Sorting styles */
+        th[data-column] {
+            position: relative;
+            transition: background-color 0.2s ease;
+        }
+
+        th[data-column]:hover {
+            background-color: rgba(0, 123, 255, 0.1);
+        }
+
+        th[data-column] i {
+            opacity: 0.5;
+            transition: opacity 0.2s ease;
+        }
+
+        th[data-column]:hover i {
+            opacity: 1;
+        }
+
+        .sort-icon {
+            opacity: 1 !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <div class="header-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="h2 mb-2">
+                        <i class="fas fa-users me-2"></i>
+                        Data Pegawai ASN
+                    </h1>
+                    <p class="mb-0 opacity-75">PNS dan PPPK Diskominfo HST</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="d-flex justify-content-end">
+                        <button class="btn btn-light me-2" onclick="exportData()">
+                            <i class="fas fa-download me-1"></i> Export
+                        </button>
+                        <button class="btn btn-light" onclick="printData()">
+                            <i class="fas fa-print me-1"></i> Print
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card">
+                    <div class="d-flex align-items-center">
+                        <div class="stats-icon primary me-3">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div>
+                            <h3 class="h4 mb-1" id="totalEmployees">0</h3>
+                            <p class="text-muted mb-0">Total Pegawai</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card success">
+                    <div class="d-flex align-items-center">
+                        <div class="stats-icon success me-3">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                        <div>
+                            <h3 class="h4 mb-1" id="activeEmployees">0</h3>
+                            <p class="text-muted mb-0">Aktif</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card warning">
+                    <div class="d-flex align-items-center">
+                        <div class="stats-icon warning me-3">
+                            <i class="fas fa-user-clock"></i>
+                        </div>
+                        <div>
+                            <h3 class="h4 mb-1" id="inactiveEmployees">0</h3>
+                            <p class="text-muted mb-0">Tidak Aktif</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card info">
+                    <div class="d-flex align-items-center">
+                        <div class="stats-icon info me-3">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div>
+                            <h3 class="h4 mb-1" id="totalDivisions">0</h3>
+                            <p class="text-muted mb-0">Bidang/Seksi</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h4 mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    Data Pegawai ASN (PNS dan PPPK) Diskominfo HST
+                </h2>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="showAddEmployeeModal()">
+                        <i class="fas fa-plus me-1"></i> Tambah Pegawai
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="searchInput" class="form-label">Cari Pegawai</label>
+                        <input type="text" class="form-control" id="searchInput" placeholder="Nama, NIP, atau Jabatan...">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="statusFilter" class="form-label">Status</label>
+                        <select class="form-select" id="statusFilter">
+                            <option value="">Semua Status</option>
+                            <option value="true">Aktif</option>
+                            <option value="false">Tidak Aktif</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="divisionFilter" class="form-label">Bidang/Seksi</label>
+                        <select class="form-select" id="divisionFilter">
+                            <option value="">Semua Bidang</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">&nbsp;</label>
+                        <button class="btn btn-primary w-100" onclick="applyFilters()">
+                            <i class="fas fa-search me-1"></i> Filter
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sorting Info -->
+            <div id="sortingInfo" class="mb-3" style="display: none;">
+                <div class="alert alert-info d-flex align-items-center">
+                    <i class="fas fa-sort me-2"></i>
+                    <span id="sortingText">Data diurutkan berdasarkan: </span>
+                    <button class="btn btn-sm btn-outline-secondary ms-auto" onclick="clearSorting()">
+                        <i class="fas fa-times me-1"></i> Reset
+                    </button>
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th width="5%">No.</th>
+                            <th width="20%" data-column="name" onclick="sortTable('name')" style="cursor: pointer;">
+                                Nama <i class="fas fa-sort" style="margin-left: 5px;"></i>
+                            </th>
+                            <th width="15%" data-column="nip" onclick="sortTable('nip')" style="cursor: pointer;">
+                                NIP/NI PPPK <i class="fas fa-sort" style="margin-left: 5px;"></i>
+                            </th>
+                            <th width="20%" data-column="position" onclick="sortTable('position')" style="cursor: pointer;">
+                                Jabatan <i class="fas fa-sort" style="margin-left: 5px;"></i>
+                            </th>
+                            <th width="15%" data-column="rank_class" onclick="sortTable('rank_class')" style="cursor: pointer;">
+                                Pangkat/Golongan <i class="fas fa-sort" style="margin-left: 5px;"></i>
+                            </th>
+                            <th width="15%" data-column="division" onclick="sortTable('division')" style="cursor: pointer;">
+                                Bidang/Seksi <i class="fas fa-sort" style="margin-left: 5px;"></i>
+                            </th>
+                            <th width="10%">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="employeesTableBody">
+                        <tr>
+                            <td colspan="7" class="no-data">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p class="mb-0">Memuat data...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <nav aria-label="Pagination" class="mt-4">
+                <ul class="pagination" id="pagination">
+                    <!-- Pagination will be generated here -->
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Add/Edit Employee Modal -->
+    <div class="modal fade" id="employeeModal" tabindex="-1" aria-labelledby="employeeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="employeeModalLabel">
+                        <i class="fas fa-user-plus me-2"></i>
+                        Tambah Pegawai Baru
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="employeeForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="nip" class="form-label">NIP/NI PPPK <span class="required">*</span></label>
+                                <input type="text" class="form-control" id="nip" name="nip" required>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="name" class="form-label">Nama Lengkap <span class="required">*</span></label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="position" class="form-label">Jabatan <span class="required">*</span></label>
+                                <input type="text" class="form-control" id="position" name="position" required>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="rankClass" class="form-label">Pangkat/Golongan</label>
+                                <select class="form-select" id="rankClass" name="rankClass">
+                                    <option value="">Pilih Pangkat/Golongan</option>
+                                    <!-- PNS Options -->
+                                    <optgroup label="PNS - Golongan IV">
+                                        <option value="Pembina Utama (IV/e)">Pembina Utama (IV/e)</option>
+                                        <option value="Pembina Utama Madya (IV/d)">Pembina Utama Madya (IV/d)</option>
+                                        <option value="Pembina Utama Muda (IV/c)">Pembina Utama Muda (IV/c)</option>
+                                        <option value="Pembina Tingkat I (IV/b)">Pembina Tingkat I (IV/b)</option>
+                                        <option value="Pembina (IV/a)">Pembina (IV/a)</option>
+                                    </optgroup>
+                                    <optgroup label="PNS - Golongan III">
+                                        <option value="Penata Tingkat I (III/d)">Penata Tingkat I (III/d)</option>
+                                        <option value="Penata (III/c)">Penata (III/c)</option>
+                                        <option value="Penata Muda Tingkat I (III/b)">Penata Muda Tingkat I (III/b)</option>
+                                        <option value="Penata Muda (III/a)">Penata Muda (III/a)</option>
+                                    </optgroup>
+                                    <optgroup label="PNS - Golongan II">
+                                        <option value="Pengatur Tingkat I (II/d)">Pengatur Tingkat I (II/d)</option>
+                                        <option value="Pengatur (II/c)">Pengatur (II/c)</option>
+                                        <option value="Pengatur Muda Tingkat I (II/b)">Pengatur Muda Tingkat I (II/b)</option>
+                                        <option value="Pengatur Muda (II/a)">Pengatur Muda (II/a)</option>
+                                    </optgroup>
+                                    <optgroup label="PNS - Golongan I">
+                                        <option value="Juru Tingkat I (I/d)">Juru Tingkat I (I/d)</option>
+                                        <option value="Juru (I/c)">Juru (I/c)</option>
+                                        <option value="Juru Muda Tingkat I (I/b)">Juru Muda Tingkat I (I/b)</option>
+                                        <option value="Juru Muda (I/a)">Juru Muda (I/a)</option>
+                                    </optgroup>
+                                    <!-- PPPK Options -->
+                                    <optgroup label="PPPK">
+                                        <option value="PPPK I">PPPK I</option>
+                                        <option value="PPPK II">PPPK II</option>
+                                        <option value="PPPK III">PPPK III</option>
+                                        <option value="PPPK IV">PPPK IV</option>
+                                        <option value="PPPK V">PPPK V</option>
+                                        <option value="PPPK VI">PPPK VI</option>
+                                        <option value="PPPK VII">PPPK VII</option>
+                                        <option value="PPPK VIII">PPPK VIII</option>
+                                        <option value="PPPK IX">PPPK IX</option>
+                                        <option value="PPPK X">PPPK X</option>
+                                        <option value="PPPK XI">PPPK XI</option>
+                                        <option value="PPPK XII">PPPK XII</option>
+                                        <option value="PPPK XIII">PPPK XIII</option>
+                                        <option value="PPPK XIV">PPPK XIV</option>
+                                        <option value="PPPK XV">PPPK XV</option>
+                                        <option value="PPPK XVI">PPPK XVI</option>
+                                        <option value="PPPK XVII">PPPK XVII</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="division" class="form-label">Bidang/Seksi <span class="required">*</span></label>
+                                <select class="form-select" id="division" name="division" required>
+                                    <option value="">Pilih Bidang/Seksi</option>
+                                    <option value="Sekretariat">Sekretariat</option>
+                                    <option value="Bidang Komunikasi, Informasi dan Statistik">Bidang Komunikasi, Informasi dan Statistik</option>
+                                    <option value="Informatika dan Persandian">Informatika dan Persandian</option>
+                                </select>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="employeeType" class="form-label">Jenis Pegawai <span class="required">*</span></label>
+                                <select class="form-select" id="employeeType" name="employeeType" required>
+                                    <option value="">Pilih Jenis Pegawai</option>
+                                    <option value="PNS">PNS</option>
+                                    <option value="PPPK">PPPK</option>
+                                </select>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label">No. Telepon</label>
+                                <input type="tel" class="form-control" id="phone" name="phone">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Alamat</label>
+                            <textarea class="form-control" id="address" name="address" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="isActive" name="isActive" checked>
+                                <label class="form-check-label" for="isActive">
+                                    Pegawai Aktif
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i> Batal
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="saveEmployee()">
+                        <span class="loading spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                        <i class="fas fa-save me-1"></i> Simpan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteModalLabel">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Konfirmasi Hapus
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Apakah Anda yakin ingin menghapus data pegawai ini?</p>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-warning me-2"></i>
+                        <strong>Peringatan:</strong> Tindakan ini tidak dapat dibatalkan!
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i> Batal
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                        <span class="loading spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                        <i class="fas fa-trash me-1"></i> Hapus
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Container -->
+    <div id="alertContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+        <!-- Alerts will be shown here -->
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="config/environment.js"></script>
+    
+    <script>
+        // Global variables
+        let employees = [];
+        let filteredEmployees = [];
+        let currentPage = 1;
+        let itemsPerPage = 10;
+        let editingEmployeeId = null;
+        let deletingEmployeeId = null;
+        let sortColumn = null;
+        let sortDirection = 'asc'; // 'asc' or 'desc'
+
+        // Configuration
+        const appConfig = window.SIHARAT_CONFIG || {
+            supabase: {
+                url: 'https://msqqqkmcvnltvfcgtrhy.supabase.co',
+                anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zcXFxa21jdm5sdHZmY2d0cmh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgyOTM1NTQsImV4cCI6MjA3Mzg2OTU1NH0.E6C7TCCac4OF_t5IDB4NAqF0LO-AssZEJEs5Mll5Hx4'
+            }
+        };
+
+        // API Functions
+        const API = {
+            baseUrl: appConfig.supabase.url,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${appConfig.supabase.anonKey}`,
+                'apikey': appConfig.supabase.anonKey
+            },
+
+            async request(endpoint, options = {}) {
+                try {
+                    const response = await fetch(`${this.baseUrl}/rest/v1/${endpoint}`, {
+                        ...options,
+                        headers: { ...this.headers, ...options.headers }
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.text();
+                        throw new Error(`HTTP ${response.status}: ${error}`);
+                    }
+
+                    // If response has no content (e.g., 204), return null.
+                    if (response.status === 204) {
+                        return null;
+                    }
+
+                    // For other success statuses, try to parse JSON.
+                    const responseText = await response.text();
+                    return responseText ? JSON.parse(responseText) : null;
+                } catch (error) {
+                    console.error('API Error:', error);
+                    throw error;
+                }
+            },
+
+            async getEmployees() {
+                return await this.request('employees?select=*&order=created_at.asc');
+            },
+
+            async getEmployee(id) {
+                const result = await this.request(`employees?id=eq.${id}&select=*`);
+                return result[0];
+            },
+
+            async createEmployee(data) {
+                return await this.request('employees', {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+            },
+
+            async updateEmployee(id, data) {
+                return await this.request(`employees?id=eq.${id}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify(data)
+                });
+            },
+
+            async deleteEmployee(id) {
+                return await this.request(`employees?id=eq.${id}`, {
+                    method: 'DELETE'
+                });
+            }
+        };
+
+        // Utility Functions
+        function showAlert(message, type = 'info', duration = 5000) {
+            const alertId = 'alert-' + Date.now();
+            const alertHtml = `
+                <div id="${alertId}" class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            
+            document.getElementById('alertContainer').insertAdjacentHTML('beforeend', alertHtml);
+            
+            if (duration > 0) {
+                setTimeout(() => {
+                    const alert = document.getElementById(alertId);
+                    if (alert) {
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                }, duration);
+            }
+        }
+
+        function showLoading(element, show = true) {
+            const loading = element.querySelector('.loading');
+            const icon = element.querySelector('i:not(.loading)');
+            
+            if (show) {
+                loading.classList.add('show');
+                if (icon) icon.style.display = 'none';
+            } else {
+                loading.classList.remove('show');
+                if (icon) icon.style.display = 'inline';
+            }
+        }
+
+        function validateForm() {
+            const form = document.getElementById('employeeForm');
+            const requiredFields = ['nip', 'name', 'position', 'division', 'employeeType'];
+            let isValid = true;
+
+            // Clear previous validation
+            form.querySelectorAll('.is-invalid').forEach(field => {
+                field.classList.remove('is-invalid');
+            });
+            form.querySelectorAll('.invalid-feedback').forEach(feedback => {
+                feedback.textContent = '';
+            });
+
+            // Validate required fields
+            requiredFields.forEach(fieldName => {
+                const field = form.querySelector(`[name="${fieldName}"]`);
+                if (!field.value.trim()) {
+                    field.classList.add('is-invalid');
+                    field.nextElementSibling.textContent = `${field.previousElementSibling.textContent.replace(' *', '')} harus diisi`;
+                    isValid = false;
+                }
+            });
+
+            // Validate NIP format (more flexible)
+            const nip = form.querySelector('[name="nip"]');
+            const employeeType = form.querySelector('[name="employeeType"]').value;
+            
+            if (nip.value.trim()) {
+                // More flexible validation - allow various formats
+                const nipValue = nip.value.trim();
+                if (employeeType === 'PNS') {
+                    // PNS NIP should be 18 digits, but allow some flexibility
+                    if (!/^\d{15,20}$/.test(nipValue)) {
+                        nip.classList.add('is-invalid');
+                        nip.nextElementSibling.textContent = 'NIP PNS harus 15-20 digit angka';
+                        isValid = false;
+                    }
+                } else if (employeeType === 'PPPK') {
+                    // PPPK NI can be very flexible (5-25 characters, alphanumeric)
+                    if (!/^[A-Za-z0-9]{5,25}$/.test(nipValue)) {
+                        nip.classList.add('is-invalid');
+                        nip.nextElementSibling.textContent = 'NI PPPK harus 5-25 karakter alfanumerik';
+                        isValid = false;
+                    }
+                }
+            }
+
+            // Validate email format (more flexible)
+            const email = form.querySelector('[name="email"]');
+            if (email.value.trim()) {
+                const emailValue = email.value.trim();
+                // More flexible email validation
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue) && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(emailValue)) {
+                    email.classList.add('is-invalid');
+                    email.nextElementSibling.textContent = 'Format email tidak valid';
+                    isValid = false;
+                }
+            }
+
+            // Validate phone format (very flexible)
+            const phone = form.querySelector('[name="phone"]');
+            if (phone.value.trim()) {
+                const phoneValue = phone.value.trim();
+                // Very flexible phone validation - allow various formats
+                if (!/^[\d\s\-\+\(\)\.]{8,20}$/.test(phoneValue)) {
+                    phone.classList.add('is-invalid');
+                    phone.nextElementSibling.textContent = 'Format nomor telepon tidak valid';
+                    isValid = false;
+                }
+            }
+
+            // Validate name format (more flexible)
+            const name = form.querySelector('[name="name"]');
+            if (name.value.trim()) {
+                const nameValue = name.value.trim();
+                // More flexible name validation
+                if (!/^[a-zA-Z\s\.,\-'()]{2,150}$/.test(nameValue)) {
+                    name.classList.add('is-invalid');
+                    name.nextElementSibling.textContent = 'Nama hanya boleh huruf, spasi, titik, koma, tanda hubung, dan kurung';
+                    isValid = false;
+                }
+            }
+
+            return isValid;
+        }
+
+        function clearForm() {
+            document.getElementById('employeeForm').reset();
+            document.querySelectorAll('.is-invalid').forEach(field => {
+                field.classList.remove('is-invalid');
+            });
+            document.querySelectorAll('.invalid-feedback').forEach(feedback => {
+                feedback.textContent = '';
+            });
+        }
+
+        // Data Functions
+        async function loadEmployees() {
+            try {
+                showAlert('Memuat data pegawai...', 'info', 2000);
+                employees = await API.getEmployees();
+                filteredEmployees = [...employees];
+                updateStatistics();
+                renderTable();
+                updateDivisionFilter();
+                showAlert('Data pegawai berhasil dimuat!', 'success', 3000);
+            } catch (error) {
+                console.error('Error loading employees:', error);
+                showAlert('Gagal memuat data pegawai: ' + error.message, 'danger');
+                
+                // Fallback to mock data
+                employees = [
+                    {
+                        id: '1',
+                        nip: '196512011990031001',
+                        name: 'Dr. Ahmad Hakim, S.Kom., M.T.',
+                        position: 'Kepala Dinas',
+                        rank_class: 'Pembina Utama Muda',
+                        division: 'Sekretariat',
+                        employee_type: 'PNS',
+                        phone: '081234567890',
+                        email: 'ahmad.hakim@diskominfo.hst.go.id',
+                        address: 'Jl. Merdeka No. 1, Barabai',
+                        is_active: true,
+                        created_at: '2024-01-01T00:00:00Z'
+                    }
+                ];
+                filteredEmployees = [...employees];
+                updateStatistics();
+                renderTable();
+                updateDivisionFilter();
+                showAlert('Menggunakan data contoh untuk demo', 'warning', 5000);
+            }
+        }
+
+        function updateStatistics() {
+            const total = employees.length;
+            const active = employees.filter(emp => emp.is_active).length;
+            const inactive = total - active;
+            const divisions = [...new Set(employees.map(emp => emp.division))].length;
+
+            document.getElementById('totalEmployees').textContent = total;
+            document.getElementById('activeEmployees').textContent = active;
+            document.getElementById('inactiveEmployees').textContent = inactive;
+            document.getElementById('totalDivisions').textContent = divisions;
+        }
+
+        function updateDivisionFilter() {
+            const divisions = [...new Set(employees.map(emp => emp.division))].sort();
+            const select = document.getElementById('divisionFilter');
+            
+            // Clear existing options except first
+            while (select.children.length > 1) {
+                select.removeChild(select.lastChild);
+            }
+            
+            // Add predefined division options
+            const predefinedDivisions = [
+                'Sekretariat',
+                'Bidang Komunikasi, Informasi dan Statistik',
+                'Informatika dan Persandian'
+            ];
+            
+            // Add predefined options
+            predefinedDivisions.forEach(division => {
+                const option = document.createElement('option');
+                option.value = division;
+                option.textContent = division;
+                select.appendChild(option);
+            });
+            
+            // Add existing divisions from data that might not be in predefined list
+            divisions.forEach(division => {
+                if (!predefinedDivisions.includes(division)) {
+                    const option = document.createElement('option');
+                    option.value = division;
+                    option.textContent = division;
+                    select.appendChild(option);
+                }
+            });
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('employeesTableBody');
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageData = filteredEmployees.slice(startIndex, endIndex);
+
+            if (pageData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="no-data">
+                            <i class="fas fa-search"></i>
+                            <p class="mb-0">Tidak ada data pegawai yang ditemukan</p>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                tbody.innerHTML = pageData.map((employee, index) => `
+                    <tr>
+                        <td>${startIndex + index + 1}</td>
+                        <td>
+                            <div class="fw-bold">${employee.name}</div>
+                            <small class="text-muted">${employee.employee_type}</small>
+                        </td>
+                        <td>
+                            <code>${employee.nip}</code>
+                        </td>
+                        <td>${employee.position}</td>
+                        <td>${employee.rank_class || '-'}</td>
+                        <td>
+                            <span class="badge bg-primary">${employee.division}</span>
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-sm btn-outline-primary" onclick="viewEmployee('${employee.id}')" title="Lihat Detail">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-warning" onclick="editEmployee('${employee.id}')" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteEmployee('${employee.id}')" title="Hapus">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            renderPagination();
+        }
+
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
+            const pagination = document.getElementById('pagination');
+            
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+
+            let paginationHtml = '';
+            
+            // Previous button
+            paginationHtml += `
+                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="changePage(${currentPage - 1})">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+            `;
+
+            // Page numbers
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, currentPage + 2);
+
+            if (startPage > 1) {
+                paginationHtml += `<li class="page-item"><a class="page-link" href="#" onclick="changePage(1)">1</a></li>`;
+                if (startPage > 2) {
+                    paginationHtml += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                }
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHtml += `
+                    <li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
+                    </li>
+                `;
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    paginationHtml += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                }
+                paginationHtml += `<li class="page-item"><a class="page-link" href="#" onclick="changePage(${totalPages})">${totalPages}</a></li>`;
+            }
+
+            // Next button
+            paginationHtml += `
+                <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="changePage(${currentPage + 1})">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+            `;
+
+            pagination.innerHTML = paginationHtml;
+        }
+
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
+            if (page >= 1 && page <= totalPages) {
+                currentPage = page;
+                renderTable();
+            }
+        }
+
+        // Filter Functions
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const divisionFilter = document.getElementById('divisionFilter').value;
+
+            filteredEmployees = employees.filter(employee => {
+                const matchesSearch = !searchTerm || 
+                    employee.name.toLowerCase().includes(searchTerm) ||
+                    employee.nip.toLowerCase().includes(searchTerm) ||
+                    employee.position.toLowerCase().includes(searchTerm);
+
+                const matchesStatus = !statusFilter || 
+                    (statusFilter === 'true' && employee.is_active) ||
+                    (statusFilter === 'false' && !employee.is_active);
+
+                const matchesDivision = !divisionFilter || 
+                    employee.division === divisionFilter;
+
+                return matchesSearch && matchesStatus && matchesDivision;
+            });
+
+            // Apply sorting if any column is sorted, otherwise sort by created_at (newest at bottom)
+            if (sortColumn) {
+                sortData(sortColumn, sortDirection);
+            } else {
+                // Default sorting: newest entries at bottom
+                sortData('created_at', 'asc');
+            }
+
+            currentPage = 1;
+            renderTable();
+        }
+
+        function sortData(column, direction) {
+            filteredEmployees.sort((a, b) => {
+                let aValue = a[column];
+                let bValue = b[column];
+
+                // Handle different data types
+                if (column === 'name' || column === 'position' || column === 'division' || column === 'rank_class') {
+                    aValue = (aValue || '').toString().toLowerCase();
+                    bValue = (bValue || '').toString().toLowerCase();
+                } else if (column === 'nip') {
+                    aValue = (aValue || '').toString();
+                    bValue = (bValue || '').toString();
+                } else if (column === 'is_active') {
+                    aValue = aValue ? 1 : 0;
+                    bValue = bValue ? 1 : 0;
+                } else if (column === 'created_at') {
+                    // For created_at, we want newest at bottom by default
+                    aValue = new Date(aValue || 0);
+                    bValue = new Date(bValue || 0);
+                }
+
+                if (direction === 'asc') {
+                    return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
+                } else {
+                    return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
+                }
+            });
+        }
+
+        function sortTable(column) {
+            if (sortColumn === column) {
+                // Toggle direction if same column
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                // New column, start with ascending
+                sortColumn = column;
+                sortDirection = 'asc';
+            }
+
+            sortData(column, sortDirection);
+            renderTable();
+            updateSortIcons();
+        }
+
+        function updateSortIcons() {
+            // Remove all sort icons first
+            document.querySelectorAll('.sort-icon').forEach(icon => {
+                icon.remove();
+            });
+
+            // Add sort icon to current column
+            if (sortColumn) {
+                const header = document.querySelector(`th[data-column="${sortColumn}"]`);
+                if (header) {
+                    const icon = document.createElement('i');
+                    icon.className = `fas fa-sort-${sortDirection === 'asc' ? 'up' : 'down'} sort-icon ms-1`;
+                    icon.style.color = '#007bff';
+                    header.appendChild(icon);
+                }
+            }
+
+            // Update sorting info
+            updateSortingInfo();
+        }
+
+        function updateSortingInfo() {
+            const sortingInfo = document.getElementById('sortingInfo');
+            const sortingText = document.getElementById('sortingText');
+            
+            if (sortColumn) {
+                const columnNames = {
+                    'name': 'Nama',
+                    'nip': 'NIP/NI PPPK',
+                    'position': 'Jabatan',
+                    'rank_class': 'Pangkat/Golongan',
+                    'division': 'Bidang/Seksi'
+                };
+                
+                const directionText = sortDirection === 'asc' ? 'A-Z' : 'Z-A';
+                sortingText.textContent = `Data diurutkan berdasarkan: ${columnNames[sortColumn]} (${directionText})`;
+                sortingInfo.style.display = 'block';
+            } else {
+                sortingInfo.style.display = 'none';
+            }
+        }
+
+        function clearSorting() {
+            sortColumn = null;
+            sortDirection = 'asc';
+            
+            // Remove all sort icons
+            document.querySelectorAll('.sort-icon').forEach(icon => {
+                icon.remove();
+            });
+            
+            // Hide sorting info
+            document.getElementById('sortingInfo').style.display = 'none';
+            
+            // Reapply filters to get original order (newest at bottom)
+            applyFilters();
+        }
+
+        // CRUD Functions
+        function showAddEmployeeModal() {
+            editingEmployeeId = null;
+            clearForm();
+            document.getElementById('employeeModalLabel').innerHTML = '<i class="fas fa-user-plus me-2"></i>Tambah Pegawai Baru';
+            new bootstrap.Modal(document.getElementById('employeeModal')).show();
+        }
+
+        function viewEmployee(id) {
+            const employee = employees.find(emp => emp.id === id);
+            if (employee) {
+                showAlert(`Detail pegawai: ${employee.name}`, 'info');
+                // You can implement a detailed view modal here
+            }
+        }
+
+        function editEmployee(id) {
+            const employee = employees.find(emp => emp.id === id);
+            if (employee) {
+                editingEmployeeId = id;
+                clearForm();
+                
+                // Populate form
+                document.getElementById('nip').value = employee.nip;
+                document.getElementById('name').value = employee.name;
+                document.getElementById('position').value = employee.position;
+                document.getElementById('rankClass').value = employee.rank_class || '';
+                document.getElementById('division').value = employee.division;
+                document.getElementById('employeeType').value = employee.employee_type;
+                document.getElementById('phone').value = employee.phone || '';
+                document.getElementById('email').value = employee.email || '';
+                document.getElementById('address').value = employee.address || '';
+                document.getElementById('isActive').checked = employee.is_active;
+
+                document.getElementById('employeeModalLabel').innerHTML = '<i class="fas fa-user-edit me-2"></i>Edit Pegawai';
+                new bootstrap.Modal(document.getElementById('employeeModal')).show();
+            }
+        }
+
+        function deleteEmployee(id) {
+            deletingEmployeeId = id;
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+
+        async function saveEmployee() {
+            if (!validateForm()) {
+                showAlert('Mohon perbaiki kesalahan pada form', 'danger');
+                return;
+            }
+
+            const form = document.getElementById('employeeForm');
+            const formData = new FormData(form);
+            const employeeData = {
+                nip: formData.get('nip'),
+                name: formData.get('name'),
+                position: formData.get('position'),
+                rank_class: formData.get('rankClass'),
+                division: formData.get('division'),
+                employee_type: formData.get('employeeType'),
+                phone: formData.get('phone'),
+                email: formData.get('email'),
+                address: formData.get('address'),
+                is_active: formData.get('isActive') === 'on'
+            };
+
+            const saveButton = document.querySelector('#employeeModal .btn-primary');
+            showLoading(saveButton, true);
+
+            try {
+                if (editingEmployeeId) {
+                    await API.updateEmployee(editingEmployeeId, employeeData);
+                    showAlert('Data pegawai berhasil diperbarui!', 'success');
+                } else {
+                    await API.createEmployee(employeeData);
+                    showAlert('Pegawai baru berhasil ditambahkan!', 'success');
+                }
+                
+                bootstrap.Modal.getInstance(document.getElementById('employeeModal')).hide();
+                await loadEmployees();
+            } catch (error) {
+                console.error('Error saving employee:', error);
+                
+                // Parse error message for better user feedback
+                let errorMessage = 'Gagal menyimpan data';
+                
+                if (error.message.includes('pattern') || error.message.includes('expected pattern')) {
+                    errorMessage = 'Format data tidak sesuai. Periksa NIP, email, atau nomor telepon.';
+                } else if (error.message.includes('duplicate') || error.message.includes('unique')) {
+                    errorMessage = 'NIP/NI PPPK sudah digunakan. Gunakan NIP/NI yang berbeda.';
+                } else if (error.message.includes('required')) {
+                    errorMessage = 'Data yang wajib diisi masih kosong.';
+                } else if (error.message.includes('network') || error.message.includes('fetch')) {
+                    errorMessage = 'Koneksi bermasalah. Periksa koneksi internet Anda.';
+                } else if (error.message.includes('SyntaxError')) {
+                    errorMessage = 'Format data tidak sesuai. Periksa semua field yang diisi.';
+                } else {
+                    errorMessage = `Gagal menyimpan data: ${error.message}`;
+                }
+                
+                showAlert(errorMessage, 'danger');
+            } finally {
+                showLoading(saveButton, false);
+            }
+        }
+
+        async function confirmDelete() {
+            const deleteButton = document.querySelector('#deleteModal .btn-danger');
+            showLoading(deleteButton, true);
+
+            try {
+                await API.deleteEmployee(deletingEmployeeId);
+                showAlert('Data pegawai berhasil dihapus!', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+                await loadEmployees();
+            } catch (error) {
+                console.error('Error deleting employee:', error);
+                showAlert('Gagal menghapus data: ' + error.message, 'danger');
+            } finally {
+                showLoading(deleteButton, false);
+            }
+        }
+
+        // Export and Print Functions
+        function exportData() {
+            showAlert('Fitur export akan segera tersedia!', 'info');
+        }
+
+        function printData() {
+            showAlert('Fitur print akan segera tersedia!', 'info');
+        }
+
+        // Event Listeners
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        document.getElementById('statusFilter').addEventListener('change', applyFilters);
+        document.getElementById('divisionFilter').addEventListener('change', applyFilters);
+
+        // Real-time validation for form fields
+        function setupFormValidation() {
+            const nipField = document.getElementById('nip');
+            const emailField = document.getElementById('email');
+            const phoneField = document.getElementById('phone');
+            const nameField = document.getElementById('name');
+
+            // NIP validation (more flexible)
+            if (nipField) {
+                nipField.addEventListener('input', function() {
+                    const employeeType = document.getElementById('employeeType').value;
+                    const value = this.value.trim();
+                    
+                    if (value) {
+                        if (employeeType === 'PNS' && !/^\d{15,20}$/.test(value)) {
+                            this.classList.add('is-invalid');
+                            this.nextElementSibling.textContent = 'NIP PNS harus 15-20 digit angka';
+                        } else if (employeeType === 'PPPK' && !/^[A-Za-z0-9]{5,25}$/.test(value)) {
+                            this.classList.add('is-invalid');
+                            this.nextElementSibling.textContent = 'NI PPPK harus 5-25 karakter alfanumerik';
+                        } else {
+                            this.classList.remove('is-invalid');
+                            this.nextElementSibling.textContent = '';
+                        }
+                    } else {
+                        this.classList.remove('is-invalid');
+                        this.nextElementSibling.textContent = '';
+                    }
+                });
+            }
+
+            // Email validation
+            if (emailField) {
+                emailField.addEventListener('input', function() {
+                    const value = this.value.trim();
+                    if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                        this.classList.add('is-invalid');
+                        const feedback = this.nextElementSibling;
+                        if (feedback) {
+                            feedback.textContent = 'Format email tidak valid';
+                        }
+                    } else {
+                        this.classList.remove('is-invalid');
+                        const feedback = this.nextElementSibling;
+                        if (feedback) {
+                            feedback.textContent = '';
+                        }
+                    }
+                });
+            }
+
+            // Phone validation
+            if (phoneField) {
+                phoneField.addEventListener('input', function() {
+                    const value = this.value.trim();
+                    if (value && !/^[\d\s\-\+\(\)\.]{8,20}$/.test(value)) {
+                        this.classList.add('is-invalid');
+                        const feedback = this.nextElementSibling;
+                        if (feedback) {
+                            feedback.textContent = 'Format nomor telepon tidak valid';
+                        }
+                    } else {
+                        this.classList.remove('is-invalid');
+                        const feedback = this.nextElementSibling;
+                        if (feedback) {
+                            feedback.textContent = '';
+                        }
+                    }
+                });
+            }
+
+            // Name validation
+            if (nameField) {
+                nameField.addEventListener('input', function() {
+                    const value = this.value.trim();
+                    if (value && !/^[a-zA-Z\s\.,\-'()]{2,150}$/.test(value)) {
+                        this.classList.add('is-invalid');
+                        const feedback = this.nextElementSibling;
+                        if (feedback) {
+                            feedback.textContent = 'Nama hanya boleh huruf, spasi, titik, koma, tanda hubung, dan kurung';
+                        }
+                    } else {
+                        this.classList.remove('is-invalid');
+                        const feedback = this.nextElementSibling;
+                        if (feedback) {
+                            feedback.textContent = '';
+                        }
+                    }
+                });
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadEmployees();
+            setupFormValidation();
+        });
+    </script>
+</body>
+</html>
