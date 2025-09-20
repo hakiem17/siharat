@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="id" data-bs-theme="light">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, viewport-fit=cover">
+    
+    <title>Data Pegawai | SI-HARAT</title>
+    <meta name="description" content="Data Pegawai Dinas Komunikasi dan Informatika Kabupaten Hulu Sungai Tengah">
+    <meta name="keywords" content="data pegawai, diskominfo, hulu sungai tengah, dinas komunikasi">
+    <meta name="author" content="SI-HARAT">
+
+    <!-- Webmanifest + Favicon / App icons -->
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/png" href="assets/app-icons/icon-32x32.png" sizes="32x32">
+    <link rel="apple-touch-icon" href="assets/app-icons/icon-180x180.png">
+        
+    <!-- Theme switcher -->
+    <script src="assets/js/theme-switcher.js"></script>
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+
+    <!-- Font icons -->
+    <link rel="stylesheet" href="assets/icons/around-icons.min.css">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="assets/css/theme.min.css">
+    
+    <!-- Dark Mode Navbar Fix -->
+    <style>
+      /* Force navbar visibility in dark mode */
+      [data-bs-theme="dark"] .navbar {
+        background-color: #212529 !important;
+      }
+      
+      [data-bs-theme="dark"] .navbar .navbar-brand {
+        color: #ffffff !important;
+        font-weight: 600 !important;
+      }
+      
+      [data-bs-theme="dark"] .navbar .navbar-brand:hover {
+        color: #20c997 !important;
+      }
+      
+      [data-bs-theme="dark"] .navbar .nav-link {
+        color: #ffffff !important;
+        font-weight: 500 !important;
+        opacity: 1 !important;
+      }
+      
+      [data-bs-theme="dark"] .navbar .nav-link:hover {
+        color: #20c997 !important;
+      }
+      
+      [data-bs-theme="dark"] .navbar .navbar-toggler {
+        border-color: #ffffff !important;
+      }
+      
+      [data-bs-theme="dark"] .navbar .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.85%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+      }
+      
+      /* Light mode text visibility fixes */
+      [data-bs-theme="light"] .text-muted {
+        color: #6c757d !important;
+      }
+      
+      [data-bs-theme="light"] .table th {
+        color: #495057 !important;
+        background-color: #f8f9fa !important;
+      }
+      
+      [data-bs-theme="light"] .table td {
+        color: #212529 !important;
+      }
+      
+      [data-bs-theme="light"] .form-control {
+        color: #212529 !important;
+        background-color: #fff !important;
+        border-color: #ced4da !important;
+      }
+      
+      [data-bs-theme="light"] .form-control::placeholder {
+        color: #6c757d !important;
+      }
+      
+      [data-bs-theme="light"] .btn-outline-secondary {
+        color: #6c757d !important;
+        border-color: #6c757d !important;
+      }
+      
+      [data-bs-theme="light"] .btn-outline-secondary:hover {
+        color: #fff !important;
+        background-color: #6c757d !important;
+        border-color: #6c757d !important;
+      }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <header class="navbar navbar-expand-lg fixed-top bg-light">
+        <div class="container">
+            <!-- Navbar brand (Logo) -->
+            <a class="navbar-brand pe-sm-3" href="landing-siharat.html">
+                <span class="text-primary flex-shrink-0 me-2">
+                    <svg width="35" height="32" viewBox="0 0 36 33" xmlns="http://www.w3.org/2000/svg">
+                        <path fill="currentColor" d="M35.6,29c-1.1,3.4-5.4,4.4-7.9,1.9c-2.3-2.2-6.1-3.7-9.4-3.7c-3.1,0-7.5,1.8-10,4.1c-2.2,2-5.8,1.5-7.3-1.1c-1-1.8-1.2-4.1,0-6.2l0.6-1.1l0,0c0.6-0.7,4.4-5.2,12.5-5.7c0.5,1.8,2,3.1,3.9,3.1c2.2,0,4.1-1.9,4.1-4.2s-1.8-4.2-4.1-4.2c-2,0-3.6,1.4-4,3.3H7.7c-0.8,0-1.3-0.9-0.9-1.6l5.6-9.8c2.5-4.5,8.8-4.5,11.3,0L35.1,24C36,25.7,36.1,27.5,35.6,29z"></path>
+                    </svg>
+                </span>
+                SI-HARAT
+            </a>
+
+            <!-- Theme switcher -->
+            <div class="form-check form-switch mode-switch order-lg-2 me-3 me-lg-4 ms-auto" data-bs-toggle="mode">
+                <input class="form-check-input" type="checkbox" id="theme-mode">
+                <label class="form-check-label" for="theme-mode">
+                    <i class="ai-sun fs-lg"></i>
+                </label>
+                <label class="form-check-label" for="theme-mode">
+                    <i class="ai-moon fs-lg"></i>
+                </label>
+            </div>
+
+            <!-- Mobile menu toggler (Hamburger) -->
+            <button class="navbar-toggler ms-sm-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Navbar collapse (Main navigation) -->
+            <nav class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="landing-siharat.html">Home</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">Profil</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Visi &amp; Misi</a></li>
+                            <li><a class="dropdown-item" href="#">Tugas &amp; Fungsi</a></li>
+                            <li><a class="dropdown-item" href="landing-struktur-organisasi.html">Struktur Organisasi</a></li>
+                            <li><a class="dropdown-item active" href="landing-data-pegawai.html">Data Pegawai</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Berita</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Layanan</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Data</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Galeri</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Kontak</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="py-5 bg-primary" style="padding-top: 100px !important;">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold text-white mb-4">
+                        Data Pegawai
+                    </h1>
+                    <p class="lead text-white mb-4">
+                        Informasi lengkap data pegawai Dinas Komunikasi dan Informatika 
+                        Kabupaten Hulu Sungai Tengah
+                    </p>
+                    <div class="d-flex gap-3">
+                        <a href="#data-pegawai" class="btn btn-light btn-lg">
+                            <i class="ai ai-arrow-down me-2"></i>Lihat Data
+                        </a>
+                        <a href="login.html" class="btn btn-outline-light btn-lg">
+                            <i class="ai ai-login me-2"></i>Login Admin
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="text-center">
+                        <i class="ai ai-users display-1 text-white"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <div class="display-4 text-primary mb-3">
+                                <i class="ai ai-users"></i>
+                            </div>
+                            <h3 class="fw-bold text-dark" id="totalPegawai">0</h3>
+                            <p class="text-muted mb-0">Total Pegawai</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <div class="display-4 text-success mb-3">
+                                <i class="ai ai-user-check"></i>
+                            </div>
+                            <h3 class="fw-bold text-dark" id="pegawaiAktif">0</h3>
+                            <p class="text-muted mb-0">Pegawai Aktif</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <div class="display-4 text-warning mb-3">
+                                <i class="ai ai-briefcase"></i>
+                            </div>
+                            <h3 class="fw-bold text-dark" id="totalJabatan">0</h3>
+                            <p class="text-muted mb-0">Jabatan</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <div class="display-4 text-info mb-3">
+                                <i class="ai ai-building"></i>
+                            </div>
+                            <h3 class="fw-bold text-dark" id="totalBidang">0</h3>
+                            <p class="text-muted mb-0">Bidang/Seksi</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Data Pegawai Section -->
+    <section id="data-pegawai" class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2 class="h3 mb-1 text-dark">Data Pegawai</h2>
+                            <p class="text-muted mb-0">Daftar lengkap pegawai Diskominfo HST</p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <div class="input-group" style="width: 300px;">
+                                <input type="text" class="form-control" id="searchInput" placeholder="Cari pegawai...">
+                                <button class="btn btn-outline-secondary" type="button" id="searchBtn">
+                                    <i class="ai ai-search"></i>
+                                </button>
+                            </div>
+                            <select class="form-select" id="filterBidang" style="width: 200px;">
+                                <option value="">Semua Bidang</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="loadingState" class="text-center py-5">
+                        <div class="spinner-border text-primary mb-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="text-muted">Memuat data pegawai...</p>
+                    </div>
+
+                    <!-- Data Table -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Nama</th>
+                                            <th>NIP</th>
+                                            <th>Jabatan</th>
+                                            <th>Pangkat</th>
+                                            <th>Bidang/Seksi</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pegawaiTableBody">
+                                        <!-- Data will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <nav aria-label="Pagination" class="mt-4">
+                        <ul class="pagination justify-content-center" id="pagination">
+                            <!-- Pagination will be generated here -->
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white">
+      <div class="container pt-5 pb-2">
+        <div class="row g-4">
+          <div class="col-lg-4">
+            <div class="navbar-brand text-white p-0 me-0 mb-3">
+              <span class="text-primary flex-shrink-0 me-2">
+                <svg width="35" height="32" viewBox="0 0 36 33" xmlns="http://www.w3.org/2000/svg">
+                  <path fill="currentColor" d="M35.6,29c-1.1,3.4-5.4,4.4-7.9,1.9c-2.3-2.2-6.1-3.7-9.4-3.7c-3.1,0-7.5,1.8-10,4.1c-2.2,2-5.8,1.5-7.3-1.1c-1-1.8-1.2-4.1,0-6.2l0.6-1.1l0,0c0.6-0.7,4.4-5.2,12.5-5.7c0.5,1.8,2,3.1,3.9,3.1c2.2,0,4.1-1.9,4.1-4.2s-1.8-4.2-4.1-4.2c-2,0-3.6,1.4-4,3.3H7.7c-0.8,0-1.3-0.9-0.9-1.6l5.6-9.8c2.5-4.5,8.8-4.5,11.3,0L35.1,24C36,25.7,36.1,27.5,35.6,29z"></path>
+                </svg>
+              </span>
+              SI-HARAT
+            </div>
+            <p class="fs-sm text-body-secondary pb-2 pb-sm-3 mb-3 mb-sm-4">
+              Sistem Informasi Harian Rapat Dinas Komunikasi dan Informatika Kabupaten Hulu Sungai Tengah
+            </p>
+          </div>
+          <div class="col-sm-4 col-lg-3 col-xl-2">
+            <h6 class="fw-bold">Profil</h6>
+            <ul class="nav flex-column fs-sm">
+              <li class="nav-item"><a class="nav-link fw-normal px-0 py-1" href="#">Visi &amp; Misi</a></li>
+              <li class="nav-item"><a class="nav-link fw-normal px-0 py-1" href="#">Tugas &amp; Fungsi</a></li>
+              <li class="nav-item"><a class="nav-link fw-normal px-0 py-1" href="landing-struktur-organisasi.html">Struktur Organisasi</a></li>
+              <li class="nav-item"><a class="nav-link fw-normal px-0 py-1" href="landing-data-pegawai.html">Data Pegawai</a></li>
+            </ul>
+          </div>
+          <div class="col-sm-4 col-lg-3 col-xl-2">
+            <h6 class="fw-bold">Layanan</h6>
+            <ul class="nav flex-column fs-sm">
+              <li class="nav-item"><a class="nav-link fw-normal px-0 py-1" href="#">Berita</a></li>
+              <li class="nav-item"><a class="nav-link fw-normal px-0 py-1" href="#">Layanan</a></li>
+              <li class="nav-item"><a class="nav-link fw-normal px-0 py-1" href="#">Data</a></li>
+              <li class="nav-item"><a class="nav-link fw-normal px-0 py-1" href="#">Galeri</a></li>
+            </ul>
+          </div>
+          <div class="col-sm-4 col-lg-3 col-xl-2">
+            <h6 class="fw-bold">Kontak</h6>
+            <ul class="nav flex-column fs-sm">
+              <li class="nav-item">
+                <a class="nav-link fw-normal px-0 py-1" href="#">Senin - Jumat, 08.00 - 16.00 WITA</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link fw-normal px-0 py-1" href="mailto:diskominfo@hstkab.go.id">diskominfo@hstkab.go.id</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="d-sm-flex align-items-center justify-content-between pt-4 pt-md-5 mt-2 mt-md-0 mt-lg-2 mt-xl-4">
+          <div class="d-flex justify-content-center order-sm-2 me-md-n2">
+            <a class="btn btn-icon btn-sm btn-secondary btn-instagram rounded-circle mx-2" href="#" aria-label="Instagram">
+              <i class="ai-instagram"></i>
+            </a>
+            <a class="btn btn-icon btn-sm btn-secondary btn-facebook rounded-circle mx-2" href="#" aria-label="Facebook">
+              <i class="ai-facebook"></i>
+            </a>
+            <a class="btn btn-icon btn-sm btn-secondary btn-linkedin rounded-circle mx-2" href="#" aria-label="LinkedIn">
+              <i class="ai-linkedin"></i>
+            </a>
+          </div>
+          <p class="nav fs-sm order-sm-1 text-center text-sm-start pt-4 pt-sm-0 mb-0 me-4">
+            <span class="text-body-secondary">&copy; 2025 Dinas Komunikasi dan Informatika Kabupaten Hulu Sungai Tengah Made by</span>
+            <a class="nav-link fw-normal p-0 ms-1" href="https://createx.studio/" target="_blank" rel="noopener">kimqy</a>
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Back to top button -->
+    <a class="btn-scroll-top" href="#top" data-scroll aria-label="Scroll back to top">
+      <svg viewBox="0 0 40 40" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="20" cy="20" r="19" fill="none" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10"></circle>
+      </svg>
+      <i class="ai-arrow-up"></i>
+    </a>
+
+    <!-- Scripts -->
+    <script src="assets/js/theme.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Environment Configuration -->
+    <script src="config/environment.js"></script>
+    <script src="assets/js/supabase-client.js"></script>
+    
+    <script>
+        // Global variables
+        let allEmployees = [];
+        let filteredEmployees = [];
+        let currentPage = 1;
+        const itemsPerPage = 12; // 3 columns x 4 rows
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadEmployeeData();
+            initializeEventListeners();
+        });
+
+        // Load employee data from Supabase
+        async function loadEmployeeData() {
+            try {
+                // Show loading state
+                document.getElementById('loadingState').style.display = 'block';
+                document.getElementById('pegawaiTableBody').innerHTML = '';
+
+                // Use existing Supabase client from supabase-client.js
+                if (window.supabase && window.supabase.from) {
+                    const { data, error } = await window.supabase
+                        .from('employees')
+                        .select('*')
+                        .order('created_at', { ascending: true });
+
+                    if (error) {
+                        throw error;
+                    }
+
+                    allEmployees = data || [];
+                } else {
+                    // Fallback if Supabase client is not available
+                    throw new Error('Supabase client not available');
+                }
+                
+                // Fallback to mock data if no data from Supabase
+                if (allEmployees.length === 0) {
+                    allEmployees = [
+                    {
+                        id: '1',
+                        nip: '196512011990031001',
+                        name: 'Dr. Ahmad Hakim, S.Kom., M.T.',
+                        position: 'Kepala Dinas',
+                        rank_class: 'Pembina Utama Muda',
+                        division: 'Sekretariat',
+                        employee_type: 'PNS',
+                        phone: '081234567890',
+                        email: 'ahmad.hakim@diskominfo.hst.go.id',
+                        address: 'Jl. Merdeka No. 1, Barabai',
+                        is_active: true,
+                        created_at: '2024-01-01T00:00:00Z'
+                    },
+                    {
+                        id: '2',
+                        nip: '197003151995031002',
+                        name: 'Drs. Muhammad Ali, M.Si.',
+                        position: 'Sekretaris',
+                        rank_class: 'Pembina Utama Muda',
+                        division: 'Sekretariat',
+                        employee_type: 'PNS',
+                        phone: '081234567891',
+                        email: 'muhammad.ali@diskominfo.hst.go.id',
+                        address: 'Jl. Ahmad Yani No. 2, Barabai',
+                        is_active: true,
+                        created_at: '2024-01-02T00:00:00Z'
+                    },
+                    {
+                        id: '3',
+                        nip: '197512201998032003',
+                        name: 'Ir. Siti Fatimah, M.T.',
+                        position: 'Kepala Bidang Komunikasi, Informasi dan Statistik',
+                        rank_class: 'Pembina Muda',
+                        division: 'Bidang Komunikasi, Informasi dan Statistik',
+                        employee_type: 'PNS',
+                        phone: '081234567892',
+                        email: 'siti.fatimah@diskominfo.hst.go.id',
+                        address: 'Jl. Sudirman No. 3, Barabai',
+                        is_active: true,
+                        created_at: '2024-01-03T00:00:00Z'
+                    },
+                    {
+                        id: '4',
+                        nip: '198003101999031004',
+                        name: 'Drs. Abdul Rahman, M.Kom.',
+                        position: 'Kepala Bidang Informatika dan Persandian',
+                        rank_class: 'Pembina Muda',
+                        division: 'Informatika dan Persandian',
+                        employee_type: 'PNS',
+                        phone: '081234567893',
+                        email: 'abdul.rahman@diskominfo.hst.go.id',
+                        address: 'Jl. Gatot Subroto No. 4, Barabai',
+                        is_active: true,
+                        created_at: '2024-01-04T00:00:00Z'
+                    },
+                    {
+                        id: '5',
+                        nip: '198504151999032005',
+                        name: 'Siti Aminah, S.Kom.',
+                        position: 'Analis Kepegawaian',
+                        rank_class: 'Penata Muda',
+                        division: 'Sekretariat',
+                        employee_type: 'PNS',
+                        phone: '081234567894',
+                        email: 'siti.aminah@diskominfo.hst.go.id',
+                        address: 'Jl. Diponegoro No. 5, Barabai',
+                        is_active: true,
+                        created_at: '2024-01-05T00:00:00Z'
+                    },
+                    {
+                        id: '6',
+                        nip: '198205201999031006',
+                        name: 'Ahmad Yani, S.T., M.T.',
+                        position: 'Analis Sistem Informasi',
+                        rank_class: 'Penata Muda',
+                        division: 'Informatika dan Persandian',
+                        employee_type: 'PNS',
+                        phone: '081234567895',
+                        email: 'ahmad.yani@diskominfo.hst.go.id',
+                        address: 'Jl. Veteran No. 6, Barabai',
+                        is_active: true,
+                        created_at: '2024-01-06T00:00:00Z'
+                    },
+                    {
+                        id: '7',
+                        nip: '198706251999032007',
+                        name: 'Fatimah Zahra, S.Sos., M.Si.',
+                        position: 'Analis Komunikasi',
+                        rank_class: 'Penata Muda',
+                        division: 'Bidang Komunikasi, Informasi dan Statistik',
+                        employee_type: 'PNS',
+                        phone: '081234567896',
+                        email: 'fatimah.zahra@diskominfo.hst.go.id',
+                        address: 'Jl. Pahlawan No. 7, Barabai',
+                        is_active: true,
+                        created_at: '2024-01-07T00:00:00Z'
+                    },
+                    {
+                        id: '8',
+                        nip: '198807301999031008',
+                        name: 'Muhammad Rizki, S.Kom.',
+                        position: 'Pranata Komputer',
+                        rank_class: 'Penata Muda Tingkat I',
+                        division: 'Informatika dan Persandian',
+                        employee_type: 'PNS',
+                        phone: '081234567897',
+                        email: 'muhammad.rizki@diskominfo.hst.go.id',
+                        address: 'Jl. Imam Bonjol No. 8, Barabai',
+                        is_active: true,
+                        created_at: '2024-01-08T00:00:00Z'
+                    },
+                    {
+                        id: '9',
+                        nip: '198908051999032009',
+                        name: 'Siti Nurhaliza, S.Sos.',
+                        position: 'Pranata Humas',
+                        rank_class: 'Penata Muda Tingkat I',
+                        division: 'Bidang Komunikasi, Informasi dan Statistik',
+                        employee_type: 'PNS',
+                        phone: '081234567898',
+                        email: 'siti.nurhaliza@diskominfo.hst.go.id',
+                        address: 'Jl. Kartini No. 9, Barabai',
+                        is_active: true,
+                        created_at: '2024-01-09T00:00:00Z'
+                    },
+                    {
+                        id: '10',
+                        nip: '199009101999031010',
+                        name: 'Ahmad Fauzi, S.T.',
+                        position: 'Pranata Komputer Muda',
+                        rank_class: 'Penata Muda',
+                        division: 'Informatika dan Persandian',
+                        employee_type: 'PNS',
+                        phone: '081234567899',
+                        email: 'ahmad.fauzi@diskominfo.hst.go.id',
+                        address: 'Jl. Sisingamangaraja No. 10, Barabai',
+                        is_active: true,
+                        created_at: '2024-01-10T00:00:00Z'
+                    },
+                    {
+                        id: '11',
+                        nip: '199110151999032011',
+                        name: 'Nurul Huda, S.Sos.',
+                        position: 'Pranata Humas Muda',
+                        rank_class: 'Penata Muda',
+                        division: 'Bidang Komunikasi, Informasi dan Statistik',
+                        employee_type: 'PNS',
+                        phone: '081234567900',
+                        email: 'nurul.huda@diskominfo.hst.go.id',
+                        address: 'Jl. Teuku Umar No. 11, Barabai',
+                        is_active: true,
+                        created_at: '2024-01-11T00:00:00Z'
+                    },
+                    {
+                        id: '12',
+                        nip: '199211201999031012',
+                        name: 'Muhammad Iqbal, S.Kom.',
+                        position: 'Pranata Komputer Muda',
+                        rank_class: 'Penata Muda',
+                        division: 'Informatika dan Persandian',
+                        employee_type: 'PNS',
+                        phone: '081234567901',
+                        email: 'muhammad.iqbal@diskominfo.hst.go.id',
+                        address: 'Jl. Cut Nyak Dien No. 12, Barabai',
+                        is_active: true,
+                        created_at: '2024-01-12T00:00:00Z'
+                    }
+                ];
+                }
+
+                filteredEmployees = [...allEmployees];
+                updateStats();
+                updateBidangFilter();
+                renderTable();
+                renderPagination();
+
+                // Hide loading state
+                document.getElementById('loadingState').style.display = 'none';
+
+            } catch (error) {
+                console.error('Error loading employee data:', error);
+                document.getElementById('loadingState').innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="ai ai-exclamation-triangle text-warning display-4 mb-3"></i>
+                        <p class="text-muted">Gagal memuat data pegawai</p>
+                        <button class="btn btn-primary" onclick="loadEmployeeData()">Coba Lagi</button>
+                    </div>
+                `;
+            }
+        }
+
+        // Update statistics
+        function updateStats() {
+            const totalPegawai = allEmployees.length;
+            const pegawaiAktif = allEmployees.filter(emp => emp.is_active).length;
+            const totalJabatan = [...new Set(allEmployees.map(emp => emp.position))].length;
+            const totalBidang = [...new Set(allEmployees.map(emp => emp.division))].length;
+
+            document.getElementById('totalPegawai').textContent = totalPegawai;
+            document.getElementById('pegawaiAktif').textContent = pegawaiAktif;
+            document.getElementById('totalJabatan').textContent = totalJabatan;
+            document.getElementById('totalBidang').textContent = totalBidang;
+        }
+
+        // Update bidang filter options
+        function updateBidangFilter() {
+            const bidangSelect = document.getElementById('filterBidang');
+            const bidangList = [...new Set(allEmployees.map(emp => emp.division))].sort();
+            
+            bidangSelect.innerHTML = '<option value="">Semua Bidang</option>';
+            bidangList.forEach(bidang => {
+                bidangSelect.innerHTML += `<option value="${bidang}">${bidang}</option>`;
+            });
+        }
+
+        // Render table
+        function renderTable() {
+            const tbody = document.getElementById('pegawaiTableBody');
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageData = filteredEmployees.slice(startIndex, endIndex);
+
+            if (pageData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <i class="ai ai-inbox text-muted display-4 mb-3"></i>
+                            <p class="text-muted">Tidak ada data pegawai</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = pageData.map((employee, index) => `
+                <tr>
+                    <td>${startIndex + index + 1}</td>
+                    <td>
+                        <div class="fw-bold">${employee.name}</div>
+                        <small class="text-muted">${employee.employee_type}</small>
+                    </td>
+                    <td><code>${employee.nip}</code></td>
+                    <td>${employee.position}</td>
+                    <td>${employee.rank_class}</td>
+                    <td>
+                        <span class="badge bg-primary">${employee.division}</span>
+                    </td>
+                    <td>
+                        <span class="badge ${employee.is_active ? 'bg-success' : 'bg-secondary'}">
+                            ${employee.is_active ? 'Aktif' : 'Tidak Aktif'}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Render pagination
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
+            const pagination = document.getElementById('pagination');
+            
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+
+            let paginationHTML = '';
+            
+            // Previous button
+            paginationHTML += `
+                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="changePage(${currentPage - 1})">Previous</a>
+                </li>
+            `;
+
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                    paginationHTML += `
+                        <li class="page-item ${i === currentPage ? 'active' : ''}">
+                            <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
+                        </li>
+                    `;
+                } else if (i === currentPage - 3 || i === currentPage + 3) {
+                    paginationHTML += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                }
+            }
+
+            // Next button
+            paginationHTML += `
+                <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="changePage(${currentPage + 1})">Next</a>
+                </li>
+            `;
+
+            pagination.innerHTML = paginationHTML;
+        }
+
+        // Change page
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
+            if (page < 1 || page > totalPages) return;
+            
+            currentPage = page;
+            renderTable();
+            renderPagination();
+        }
+
+        // Initialize event listeners
+        function initializeEventListeners() {
+            // Search functionality
+            document.getElementById('searchInput').addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                filteredEmployees = allEmployees.filter(employee => 
+                    employee.name.toLowerCase().includes(searchTerm) ||
+                    employee.nip.toLowerCase().includes(searchTerm) ||
+                    employee.position.toLowerCase().includes(searchTerm) ||
+                    employee.division.toLowerCase().includes(searchTerm)
+                );
+                currentPage = 1;
+                renderTable();
+                renderPagination();
+            });
+
+            // Filter by bidang
+            document.getElementById('filterBidang').addEventListener('change', function() {
+                const selectedBidang = this.value;
+                if (selectedBidang === '') {
+                    filteredEmployees = [...allEmployees];
+                } else {
+                    filteredEmployees = allEmployees.filter(employee => 
+                        employee.division === selectedBidang
+                    );
+                }
+                currentPage = 1;
+                renderTable();
+                renderPagination();
+            });
+        }
+    </script>
+</body>
+</html>
