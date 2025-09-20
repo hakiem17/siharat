@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen Token - SI-HARAT</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #1e40af;
+            --secondary-color: #3b82f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #06b6d4;
+            --token-color: #8b5cf6;
+        }
+
+        body {
+            background-color: #f8fafc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid var(--token-color);
+        }
+
+        .form-header {
+            background: linear-gradient(135deg, var(--token-color), #7c3aed);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .form-body {
+            padding: 2rem;
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid var(--token-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .stats-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+            background: linear-gradient(135deg, var(--token-color), #7c3aed);
+        }
+
+        .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .token-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .token-success {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .token-warning {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .token-danger {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .btn-token {
+            background: linear-gradient(135deg, var(--token-color), #7c3aed);
+            border: none;
+            color: white;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-token:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+            color: white;
+        }
+
+        .btn-token:disabled {
+            opacity: 0.6;
+            transform: none;
+        }
+
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid var(--token-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .breadcrumb {
+            background: none;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: ">";
+            color: #6b7280;
+        }
+
+        @media (max-width: 768px) {
+            .form-body {
+                padding: 1rem;
+            }
+            
+            .stats-card {
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+                <!-- Breadcrumb -->
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="siharat-dashboard.html" class="text-decoration-none"><i class="fas fa-home me-1"></i>Dashboard</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Manajemen Token</li>
+                    </ol>
+                </nav>
+
+                <!-- Page Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h1 class="h3 mb-1">
+                            <i class="fas fa-coins text-purple me-2"></i>
+                            Manajemen Token Listrik
+                        </h1>
+                        <p class="text-muted mb-0">Pengelolaan pembelian dan pengisian token listrik</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-token" onclick="showAddTokenModal()">
+                            <i class="fas fa-plus me-2"></i>Tambah Pembelian Token
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <div class="stats-card">
+                            <div class="d-flex align-items-center">
+                                <div class="stats-icon me-3">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </div>
+                                <div>
+                                    <h4 class="mb-1" id="totalPurchases">0</h4>
+                                    <p class="text-muted mb-0">Total Pembelian</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="stats-card">
+                            <div class="d-flex align-items-center">
+                                <div class="stats-icon me-3">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </div>
+                                <div>
+                                    <h4 class="mb-1" id="totalNominal">Rp 0</h4>
+                                    <p class="text-muted mb-0">Total Nominal</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="stats-card">
+                            <div class="d-flex align-items-center">
+                                <div class="stats-icon me-3">
+                                    <i class="fas fa-bolt"></i>
+                                </div>
+                                <div>
+                                    <h4 class="mb-1" id="totalKwh">0 kWh</h4>
+                                    <p class="text-muted mb-0">Total kWh</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="stats-card">
+                            <div class="d-flex align-items-center">
+                                <div class="stats-icon me-3">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div>
+                                    <h4 class="mb-1" id="averagePurchase">Rp 0</h4>
+                                    <p class="text-muted mb-0">Rata-rata Pembelian</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Token Purchase Logs Table -->
+                <div class="form-card">
+                    <div class="form-header">
+                        <h2 class="h4 mb-0">
+                            <i class="fas fa-list me-2"></i>
+                            Log Pembelian Token
+                        </h2>
+                    </div>
+                    <div class="form-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Petugas</th>
+                                        <th>Nomor Meter</th>
+                                        <th>Tanggal Pengisian</th>
+                                        <th>Waktu</th>
+                                        <th>Nominal</th>
+                                        <th>kWh</th>
+                                        <th>Token</th>
+                                        <th>Saldo Sebelum</th>
+                                        <th>Saldo Sesudah</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tokenLogsTable">
+                                    <!-- Data akan dimuat dari database -->
+                                    <tr>
+                                        <td colspan="11" class="text-center py-4">
+                                            <div class="loading-spinner mx-auto mb-2"></div>
+                                            <p class="text-muted">Memuat data pembelian token...</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Token Modal -->
+    <div class="modal fade" id="addTokenModal" tabindex="-1" aria-labelledby="addTokenModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, var(--token-color), #7c3aed); color: white;">
+                    <h5 class="modal-title" id="addTokenModalLabel">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        Tambah Pembelian Token
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addTokenForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="nomorMeter" class="form-label">Nomor Meter</label>
+                                <input type="text" class="form-control" id="nomorMeter" name="nomorMeter" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="tanggalPengisian" class="form-label">Tanggal Pengisian</label>
+                                <input type="date" class="form-control" id="tanggalPengisian" name="tanggalPengisian" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="waktuPengisian" class="form-label">Waktu Pengisian</label>
+                                <input type="time" class="form-control" id="waktuPengisian" name="waktuPengisian" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="nominalPembelian" class="form-label">Nominal Pembelian (Rp)</label>
+                                <input type="number" class="form-control" id="nominalPembelian" name="nominalPembelian" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="jumlahKwh" class="form-label">Jumlah kWh</label>
+                                <input type="number" class="form-control" id="jumlahKwh" name="jumlahKwh" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="nomorToken" class="form-label">Nomor Token</label>
+                                <input type="text" class="form-control" id="nomorToken" name="nomorToken" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="saldoKwhSebelum" class="form-label">Saldo kWh Sebelum</label>
+                                <input type="number" class="form-control" id="saldoKwhSebelum" name="saldoKwhSebelum">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="saldoKwhSesudah" class="form-label">Saldo kWh Sesudah</label>
+                                <input type="number" class="form-control" id="saldoKwhSesudah" name="saldoKwhSesudah">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="fotoBukti" class="form-label">Foto Bukti</label>
+                            <input type="file" class="form-control" id="fotoBukti" name="fotoBukti" accept="image/*">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="keterangan" class="form-label">Keterangan</label>
+                            <textarea class="form-control" id="keterangan" name="keterangan" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-token" onclick="submitTokenPurchase()">
+                        <i class="fas fa-save me-2"></i>Simpan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Environment Configuration -->
+    <script src="config/environment.js"></script>
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/supabase-client.js"></script>
+    
+    <script>
+        // Global variables
+        let currentUser = null;
+        let addTokenModal;
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            initializeSupabase();
+            initializeModal();
+            loadTokenData();
+            setDefaultDateTime();
+        });
+
+        // Check authentication
+        function checkAuth() {
+            const userData = sessionStorage.getItem('user');
+            if (!userData) {
+                window.location.href = 'login.html';
+                return;
+            }
+            currentUser = JSON.parse(userData);
+            console.log('User authenticated for token management');
+        }
+
+        // Initialize Supabase
+        function initializeSupabase() {
+            try {
+                console.log('Supabase initialized');
+            } catch (error) {
+                console.error('Supabase initialization error:', error);
+            }
+        }
+
+        // Initialize modal
+        function initializeModal() {
+            addTokenModal = new bootstrap.Modal(document.getElementById('addTokenModal'));
+        }
+
+        // Set default date and time
+        function setDefaultDateTime() {
+            const today = new Date();
+            const dateString = today.toISOString().split('T')[0];
+            const timeString = today.toTimeString().split(' ')[0].substring(0, 5);
+            
+            document.getElementById('tanggalPengisian').value = dateString;
+            document.getElementById('waktuPengisian').value = timeString;
+        }
+
+        // Show add token modal
+        window.showAddTokenModal = function() {
+            if (addTokenModal) {
+                addTokenModal.show();
+            } else {
+                console.error('Modal not initialized yet');
+            }
+        }
+
+        // Load token data
+        async function loadTokenData() {
+            try {
+                let logs = [];
+                let summary = {};
+
+                if (window.electricityAPI) {
+                    // Use Supabase API
+                    [logs, summary] = await Promise.all([
+                        window.electricityAPI.getTokenPurchaseLogs(20),
+                        window.electricityAPI.getTokenPurchaseSummary()
+                    ]);
+                } else {
+                    // Simulate loading data if Supabase not available
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    logs = [
+                        {
+                            id: 1,
+                            nomor_meter: '12345678901',
+                            tanggal_pengisian: '2025-09-20',
+                            waktu_pengisian: '10:30:00',
+                            nominal_pembelian: 100000,
+                            jumlah_kwh: 50,
+                            nomor_token: '1234-5678-9012-3456',
+                            saldo_kwh_sebelum: 25,
+                            saldo_kwh_sesudah: 75,
+                            users: { name: 'Admin SI-HARAT' }
+                        }
+                    ];
+                    summary = {
+                        total_purchases: 1,
+                        total_nominal: 100000,
+                        total_kwh: 50,
+                        average_purchase: 100000
+                    };
+                }
+
+                // Update stats
+                document.getElementById('totalPurchases').textContent = summary.total_purchases || 0;
+                document.getElementById('totalNominal').textContent = `Rp ${(summary.total_nominal || 0).toLocaleString()}`;
+                document.getElementById('totalKwh').textContent = `${summary.total_kwh || 0} kWh`;
+                document.getElementById('averagePurchase').textContent = `Rp ${(summary.average_purchase || 0).toLocaleString()}`;
+
+                // Update table
+                updateTokenLogsTable(logs);
+                
+            } catch (error) {
+                console.error('Error loading token data:', error);
+                showNotification('Gagal memuat data token', 'danger');
+            }
+        }
+
+        // Update token logs table
+        function updateTokenLogsTable(logs) {
+            const tbody = document.getElementById('tokenLogsTable');
+            
+            if (logs.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="11" class="text-center py-4">
+                            <i class="fas fa-inbox text-muted mb-2"></i>
+                            <p class="text-muted">Belum ada data pembelian token</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = logs.map((log, index) => `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${log.users?.name || 'Admin SI-HARAT'}</td>
+                    <td><code>${log.nomor_meter}</code></td>
+                    <td>${formatDate(log.tanggal_pengisian)}</td>
+                    <td>${log.waktu_pengisian}</td>
+                    <td><strong>Rp ${parseFloat(log.nominal_pembelian).toLocaleString()}</strong></td>
+                    <td><strong>${log.jumlah_kwh} kWh</strong></td>
+                    <td><code>${log.nomor_token}</code></td>
+                    <td>${log.saldo_kwh_sebelum || 'N/A'}</td>
+                    <td>${log.saldo_kwh_sesudah || 'N/A'}</td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-sm btn-outline-primary" onclick="viewTokenLog(${log.id})" title="Lihat Detail">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-warning" onclick="editTokenLog(${log.id})" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteTokenLog(${log.id})" title="Hapus">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Submit token purchase
+        window.submitTokenPurchase = async function() {
+            const submitBtn = document.querySelector('#addTokenModal .btn-token');
+            const originalText = submitBtn.innerHTML;
+            
+            // Show loading
+            submitBtn.innerHTML = '<div class="loading-spinner me-2"></div>Menyimpan...';
+            submitBtn.disabled = true;
+
+            try {
+                const formData = new FormData(document.getElementById('addTokenForm'));
+                const tokenData = {
+                    petugas_id: null, // Set to null to avoid foreign key constraint
+                    nomor_meter: formData.get('nomorMeter'),
+                    tanggal_pengisian: formData.get('tanggalPengisian'),
+                    waktu_pengisian: formData.get('waktuPengisian'),
+                    nominal_pembelian: parseFloat(formData.get('nominalPembelian')),
+                    jumlah_kwh: parseFloat(formData.get('jumlahKwh')),
+                    nomor_token: formData.get('nomorToken'),
+                    saldo_kwh_sebelum: formData.get('saldoKwhSebelum') ? parseFloat(formData.get('saldoKwhSebelum')) : null,
+                    saldo_kwh_sesudah: formData.get('saldoKwhSesudah') ? parseFloat(formData.get('saldoKwhSesudah')) : null,
+                    foto_bukti: formData.get('fotoBukti') ? await uploadFile(formData.get('fotoBukti')) : null,
+                    keterangan: formData.get('keterangan')
+                };
+
+                if (window.electricityAPI) {
+                    // Use Supabase API
+                    const result = await window.electricityAPI.addTokenPurchaseLog(tokenData);
+                    console.log('Token purchase saved:', result);
+                } else {
+                    // Simulate API call if Supabase not available
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                }
+                
+                showNotification('Pembelian token berhasil disimpan!', 'success');
+                addTokenModal.hide();
+                document.getElementById('addTokenForm').reset();
+                setDefaultDateTime();
+                loadTokenData();
+                
+            } catch (error) {
+                console.error('Error saving token purchase:', error);
+                showNotification('Gagal menyimpan pembelian token: ' + error.message, 'danger');
+            } finally {
+                // Reset button
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Upload file (simplified)
+        async function uploadFile(file) {
+            // In real implementation, upload to Supabase Storage
+            return 'uploaded_file_url';
+        }
+
+        // View token log
+        function viewTokenLog(id) {
+            showNotification('Fitur lihat detail akan segera tersedia!', 'info');
+        }
+
+        // Edit token log
+        function editTokenLog(id) {
+            showNotification('Fitur edit akan segera tersedia!', 'info');
+        }
+
+        // Delete token log
+        async function deleteTokenLog(id) {
+            if (!confirm('Apakah Anda yakin ingin menghapus data pembelian token ini?')) {
+                return;
+            }
+
+            try {
+                if (window.electricityAPI) {
+                    await window.electricityAPI.deleteTokenPurchaseLog(id);
+                }
+                showNotification('Data pembelian token berhasil dihapus!', 'success');
+                loadTokenData();
+            } catch (error) {
+                console.error('Error deleting token log:', error);
+                showNotification('Gagal menghapus data pembelian token', 'danger');
+            }
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('id-ID', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            });
+        }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

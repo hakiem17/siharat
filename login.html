@@ -11,13 +11,10 @@
     <!-- Web Fonts -->
     <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800" rel="stylesheet" type="text/css">
     
-    <!-- Vendor CSS -->
-    <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.css" />
-    <link rel="stylesheet" href="assets/vendor/font-awesome/css/all.min.css" />
-    <link rel="stylesheet" href="assets/vendor/animate/animate.compat.css">
-    
-    <!-- Theme CSS -->
-    <link rel="stylesheet" href="assets/css/theme.css">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <!-- Custom Login Styles -->
     <style>
@@ -408,12 +405,12 @@
                 
                 <form id="loginForm" novalidate>
                     <div class="form-group">
-                        <label for="username" class="form-label">Username</label>
+                        <label for="username" class="form-label">Email</label>
                         <div class="input-group">
                             <span class="input-group-text">
-                                <i class="fas fa-user"></i>
+                                <i class="fas fa-envelope"></i>
                             </span>
-                            <input type="text" class="form-control" id="username" name="username" placeholder="Masukkan username" required>
+                            <input type="email" class="form-control" id="username" name="username" placeholder="Masukkan email" required>
                         </div>
                     </div>
                     
@@ -458,8 +455,7 @@
     </div>
 
     <!-- Scripts -->
-    <script src="assets/vendor/jquery/jquery.js"></script>
-    <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
         // Password toggle functionality
@@ -484,22 +480,44 @@
             
             const loginButton = document.getElementById('loginButton');
             const originalButtonHtml = loginButton.innerHTML;
+            const email = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
             
             // Show loading state
             loginButton.classList.add('loading');
             loginButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Memproses...';
             loginButton.disabled = true;
             
-            // Simulate login process
-            setTimeout(() => {
+            // Simple validation
+            if (email === 'admin@hakiem.com' && password === 'siharat123#') {
+                // Store user data in sessionStorage
+                sessionStorage.setItem('user', JSON.stringify({
+                    id: 'admin-001',
+                    email: email,
+                    name: 'Admin SI-HARAT',
+                    role: 'admin',
+                    is_active: true
+                }));
+                
+                // Show success message
+                loginButton.innerHTML = '<i class="fas fa-check me-2"></i>Berhasil!';
+                loginButton.classList.remove('loading');
+                loginButton.classList.add('btn-success');
+                
+                // Redirect to dashboard after short delay
+                setTimeout(() => {
+                    window.location.href = 'siharat-dashboard.html';
+                }, 1000);
+                
+            } else {
                 // Reset button
                 loginButton.classList.remove('loading');
                 loginButton.innerHTML = originalButtonHtml;
                 loginButton.disabled = false;
                 
-                // Redirect to dashboard
-                window.location.href = 'siharat-dashboard.html';
-            }, 2000);
+                // Show error message
+                alert('Email atau password salah!');
+            }
         });
         
         // Add focus effects to form controls

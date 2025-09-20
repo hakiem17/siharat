@@ -289,43 +289,43 @@
         <nav class="sidebar-nav">
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a class="nav-link active" href="#" onclick="loadPage('dashboard')">
+                    <a class="nav-link active" href="#" onclick="loadPage('dashboard', event)">
                         <i class="fas fa-tachometer-alt"></i>
                         <span>Dashboard</span>
                                 </a>
                             </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="loadPage('data-pegawai')">
+                    <a class="nav-link" href="#" onclick="loadPage('data-pegawai', event)">
                         <i class="fas fa-users"></i>
                         <span>Data Pegawai</span>
                     </a>
                             </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="loadPage('absensi')">
+                    <a class="nav-link" href="#" onclick="loadPage('absensi', event)">
                         <i class="fas fa-calendar-check"></i>
                         <span>Absensi Rapat</span>
                     </a>
                             </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="loadPage('notulen')">
+                    <a class="nav-link" href="#" onclick="loadPage('notulen', event)">
                         <i class="fas fa-file-alt"></i>
                         <span>Notulen Rapat</span>
                                 </a>
                             </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="loadPage('bbm')">
+                    <a class="nav-link" href="#" onclick="loadPage('bbm', event)">
                         <i class="fas fa-gas-pump"></i>
                         <span>Manajemen BBM</span>
                                     </a>
                                 </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" onclick="loadPage('listrik', event)">
+                <i class="fas fa-bolt"></i>
+                <span>Manajemen Listrik</span>
+            </a>
+        </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="loadPage('listrik')">
-                        <i class="fas fa-bolt"></i>
-                        <span>Manajemen Listrik</span>
-                    </a>
-                                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="loadPage('laporan')">
+                    <a class="nav-link" href="#" onclick="loadPage('laporan', event)">
                         <i class="fas fa-chart-bar"></i>
                                         <span>Laporan</span>
                                     </a>
@@ -337,6 +337,22 @@
                                     </a>
                                 </li>
                             </ul>
+                            
+                            <!-- User Info -->
+                            <div class="user-info mt-4 p-3" style="border-top: 1px solid rgba(255,255,255,0.1);">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="user-avatar me-2">
+                                        <i class="fas fa-user"></i>
+                    </div>
+                                    <div class="user-details">
+                                        <div class="user-name text-white fw-bold">Loading...</div>
+                                        <div class="user-role text-white-50 small">Loading...</div>
+                </div>
+                                </div>
+                                <button class="btn btn-outline-light btn-sm w-100" onclick="logout()">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                </button>
+                            </div>
                         </nav>
                     </div>
 
@@ -512,12 +528,109 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
+    <!-- Environment Configuration -->
+    <script src="config/environment.js"></script>
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/supabase-client.js"></script>
+    
     <script>
         // Global variables
         let currentPage = 'dashboard';
+        let currentUser = null;
+
+        // Check authentication on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+        });
+
+        // Check if user is authenticated
+        async function checkAuth() {
+            try {
+                // Get user from sessionStorage
+                const userData = sessionStorage.getItem('user');
+                if (!userData) {
+                    // Redirect to login if no user data
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                currentUser = JSON.parse(userData);
+
+                // Update user info in sidebar
+                updateUserInfo();
+
+                // For simple login, skip Supabase auth check
+                console.log('User authenticated:', currentUser);
+                
+            } catch (error) {
+                console.error('Auth check error:', error);
+                sessionStorage.removeItem('user');
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Update user info in sidebar
+        function updateUserInfo() {
+            if (currentUser) {
+                // Update user name in sidebar
+                const userNameElement = document.querySelector('.user-name');
+                if (userNameElement) {
+                    userNameElement.textContent = currentUser.name;
+                }
+
+                // Update user role
+                const userRoleElement = document.querySelector('.user-role');
+                if (userRoleElement) {
+                    userRoleElement.textContent = currentUser.role;
+                }
+
+                // Show/hide menu items based on role
+                updateMenuVisibility();
+            }
+        }
+
+        // Update menu visibility based on user role
+        function updateMenuVisibility() {
+            if (!currentUser) return;
+
+            const role = currentUser.role;
+            
+            // Hide admin-only features for non-admin users
+            if (role !== 'admin') {
+                const adminItems = document.querySelectorAll('.admin-only');
+                adminItems.forEach(item => {
+                    item.style.display = 'none';
+                });
+            }
+
+            // Hide manager-only features for non-manager users
+            if (role !== 'admin' && role !== 'manager') {
+                const managerItems = document.querySelectorAll('.manager-only');
+                managerItems.forEach(item => {
+                    item.style.display = 'none';
+                });
+            }
+        }
+
+        // Logout function
+        async function logout() {
+            try {
+                // Clear session storage
+                sessionStorage.removeItem('user');
+                
+                // Redirect to login
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Logout error:', error);
+                // Still redirect even if logout fails
+                sessionStorage.removeItem('user');
+                window.location.href = 'login.html';
+            }
+        }
 
         // Load page content
-        function loadPage(page) {
+        function loadPage(page, event = null) {
             const contentArea = document.getElementById('contentArea');
             const pageTitle = document.getElementById('pageTitle');
             
@@ -525,7 +638,9 @@
             document.querySelectorAll('.nav-link').forEach(link => {
                 link.classList.remove('active');
             });
-            event.target.classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
             
             // Show loading
             contentArea.innerHTML = `
@@ -713,10 +828,10 @@
                     pageTitle.textContent = 'Manajemen Listrik';
                     setTimeout(() => {
                         contentArea.innerHTML = `
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle me-2"></i>
-                                Fitur manajemen listrik akan segera tersedia.
-                            </div>
+                            <iframe src="manajemen-token.html" class="content-iframe" 
+                                    onload="this.style.opacity='1'" 
+                                    style="opacity:0; transition: opacity 0.3s ease;">
+                            </iframe>
                         `;
                     }, 500);
                     break;

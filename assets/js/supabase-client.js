@@ -1,312 +1,265 @@
-// Supabase Client Configuration
-// Menggunakan konfigurasi dari environment.js
-
-const SUPABASE_URL = window.SIHARAT_CONFIG?.supabase?.url || 'https://your-project-id.supabase.co'
-const SUPABASE_ANON_KEY = window.SIHARAT_CONFIG?.supabase?.anonKey || 'your-anon-key-here'
-
-// Supabase client instance
-let supabase = null
+// Load environment configuration
+const supabaseConfig = window.SIHARAT_CONFIG || {
+    supabase: {
+        url: 'https://msqqqkmcvnltvfcgtrhy.supabase.co',
+        anonKey: 'yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zcXFxa21jdm5sdHZmY2d0cmh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgyOTM1NTQsImV4cCI6MjA3Mzg2OTU1NH0.E6C7TCCac4OF_t5IDB4NAqF0LO-AssZEJEs5Mll5Hx4'
+    }
+};
 
 // Initialize Supabase client
-function initSupabase() {
-    // Wait for environment config to load
-    if (!window.SIHARAT_CONFIG) {
-        console.warn('⚠️ Environment config not loaded yet, retrying...')
-        setTimeout(initSupabase, 100)
-        return false
-    }
-    
-    if (typeof createClient !== 'undefined') {
-        supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-        console.log('✅ Supabase client initialized with URL:', SUPABASE_URL)
-        return true
-    } else {
-        console.error('❌ Supabase library not loaded. Please include the Supabase script.')
-        return false
-    }
-}
+const supabase = window.supabase.createClient(supabaseConfig.supabase.url, supabaseConfig.supabase.anonKey);
 
-// Test database connection
-async function testConnection() {
-    if (!supabase) {
-        console.error('❌ Supabase not initialized')
-        return false
+// Electricity Management API Functions
+class ElectricityAPI {
+    constructor() {
+        this.supabase = supabase;
     }
 
-    try {
-        const { data, error } = await supabase
-            .from('employees')
-            .select('count')
-            .limit(1)
-        
-        if (error) {
-            console.error('❌ Database query error:', error)
-            throw error
-        }
-        console.log('✅ Database connection successful, data:', data)
-        return true
-    } catch (error) {
-        console.error('❌ Database connection failed:', error)
-        return false
-    }
-}
-
-// Employee API functions
-const employeeAPI = {
-    // Get all employees
-    async getAll() {
-        if (!supabase) throw new Error('Supabase not initialized')
-        
-        const { data, error } = await supabase
-            .from('employees')
-            .select('*')
-            .order('name')
-        
-        if (error) throw error
-        return data
-    },
-
-    // Get employee by ID
-    async getById(id) {
-        if (!supabase) throw new Error('Supabase not initialized')
-        
-        const { data, error } = await supabase
-            .from('employees')
-            .select('*')
-            .eq('id', id)
-            .single()
-        
-        if (error) throw error
-        return data
-    },
-
-    // Create new employee
-    async create(employeeData) {
-        if (!supabase) throw new Error('Supabase not initialized')
-        
-        const { data, error } = await supabase
-            .from('employees')
-            .insert(employeeData)
-            .select()
-        
-        if (error) throw error
-        return data[0]
-    },
-
-    // Update employee
-    async update(id, employeeData) {
-        if (!supabase) throw new Error('Supabase not initialized')
-        
-        const { data, error } = await supabase
-            .from('employees')
-            .update(employeeData)
-            .eq('id', id)
-            .select()
-        
-        if (error) throw error
-        return data[0]
-    },
-
-    // Delete employee
-    async delete(id) {
-        if (!supabase) throw new Error('Supabase not initialized')
-        
-        const { error } = await supabase
-            .from('employees')
-            .delete()
-            .eq('id', id)
-        
-        if (error) throw error
-    },
-
-    // Search employees
-    async search(searchTerm) {
-        if (!supabase) throw new Error('Supabase not initialized')
-        
-        const { data, error } = await supabase
-            .from('employees')
-            .select('*')
-            .or(`name.ilike.%${searchTerm}%,nip.ilike.%${searchTerm}%,position.ilike.%${searchTerm}%`)
-            .order('name')
-        
-        if (error) throw error
-        return data
-    },
-
-    // Filter by division
-    async getByDivision(division) {
-        if (!supabase) throw new Error('Supabase not initialized')
-        
-        const { data, error } = await supabase
-            .from('employees')
-            .select('*')
-            .eq('division', division)
-            .order('name')
-        
-        if (error) throw error
-        return data
-    },
-
-    // Filter by employee type
-    async getByType(employeeType) {
-        if (!supabase) throw new Error('Supabase not initialized')
-        
-        const { data, error } = await supabase
-            .from('employees')
-            .select('*')
-            .eq('employee_type', employeeType)
-            .order('name')
-        
-        if (error) throw error
-        return data
-    }
-}
-
-// Meeting API functions
-const meetingAPI = {
-    // Get all meetings
-    async getAll() {
-        if (!supabase) throw new Error('Supabase not initialized')
-        
-        const { data, error } = await supabase
-            .from('meetings')
-            .select(`
-                *,
-                organizer:users(full_name)
-            `)
-            .order('meeting_date', { ascending: false })
-        
-        if (error) throw error
-        return data
-    },
-
-    // Create new meeting
-    async create(meetingData) {
-        if (!supabase) throw new Error('Supabase not initialized')
-        
-        const { data, error } = await supabase
-            .from('meetings')
-            .insert(meetingData)
-            .select()
-        
-        if (error) throw error
-        return data[0]
-    },
-
-    // Get meeting attendance
-    async getAttendance(meetingId) {
-        if (!supabase) throw new Error('Supabase not initialized')
-        
-        const { data, error } = await supabase
-            .from('meeting_attendance')
-            .select(`
-                *,
-                employee:employees(name, nip, position)
-            `)
-            .eq('meeting_id', meetingId)
-        
-        if (error) throw error
-        return data
-    }
-}
-
-// Authentication functions
-const authAPI = {
-    // Sign in
-    async signIn(email, password) {
-        if (!supabase) throw new Error('Supabase not initialized')
-        
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email: email,
-            password: password
-        })
-        
-        if (error) throw error
-        return data
-    },
-
-    // Sign out
-    async signOut() {
-        if (!supabase) throw new Error('Supabase not initialized')
-        
-        const { error } = await supabase.auth.signOut()
-        if (error) throw error
-    },
-
-    // Get current user
-    async getCurrentUser() {
-        if (!supabase) throw new Error('Supabase not initialized')
-        
-        const { data: { user } } = await supabase.auth.getUser()
-        return user
-    }
-}
-
-// Real-time subscription functions
-const realtimeAPI = {
-    // Subscribe to employees changes
-    subscribeToEmployees(callback) {
-        if (!supabase) throw new Error('Supabase not initialized')
-        
-        return supabase
-            .channel('employees_changes')
-            .on('postgres_changes', 
-                { event: '*', schema: 'public', table: 'employees' },
-                callback
-            )
-            .subscribe()
-    },
-
-    // Subscribe to meetings changes
-    subscribeToMeetings(callback) {
-        if (!supabase) throw new Error('Supabase not initialized')
-        
-        return supabase
-            .channel('meetings_changes')
-            .on('postgres_changes', 
-                { event: '*', schema: 'public', table: 'meetings' },
-                callback
-            )
-            .subscribe()
-    }
-}
-
-// Export functions for global use
-window.SupabaseAPI = {
-    init: initSupabase,
-    testConnection: testConnection,
-    employee: employeeAPI,
-    meeting: meetingAPI,
-    auth: authAPI,
-    realtime: realtimeAPI
-}
-
-// Auto-initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    // Wait for environment config to be available
-    const checkConfig = setInterval(() => {
-        if (window.SIHARAT_CONFIG) {
-            clearInterval(checkConfig);
+    // Get all buildings
+    async getBuildings() {
+        try {
+            const { data, error } = await this.supabase
+                .from('buildings')
+                .select('*')
+                .order('name');
             
-            // Load Supabase script if not already loaded
-            if (typeof createClient === 'undefined') {
-                const script = document.createElement('script')
-                script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'
-                script.onload = function() {
-                    initSupabase()
-                }
-                document.head.appendChild(script)
-            } else {
-                initSupabase()
-            }
+            if (error) throw error;
+            return data;
+        } catch (error) {
+            console.error('Error fetching buildings:', error);
+            throw error;
         }
-    }, 100);
+    }
+
+    // Get electricity readings
+    async getElectricityReadings(limit = 10) {
+        try {
+            const { data, error } = await this.supabase
+                .from('electricity_management')
+                .select(`
+                    *,
+                    buildings(name, location),
+                    users(name)
+                `)
+                .order('reading_date', { ascending: false })
+                .limit(limit);
+            
+            if (error) throw error;
+            return data;
+        } catch (error) {
+            console.error('Error fetching electricity readings:', error);
+            throw error;
+        }
+    }
+
+    // Add new electricity reading
+    async addElectricityReading(readingData) {
+        try {
+            const { data, error } = await this.supabase
+                .from('electricity_management')
+                .insert([readingData])
+                .select();
+            
+            if (error) throw error;
+            return data[0];
+        } catch (error) {
+            console.error('Error adding electricity reading:', error);
+            throw error;
+        }
+    }
+
+    // Update electricity reading
+    async updateElectricityReading(id, readingData) {
+        try {
+            const { data, error } = await this.supabase
+                .from('electricity_management')
+                .update(readingData)
+                .eq('id', id)
+                .select();
+            
+            if (error) throw error;
+            return data[0];
+        } catch (error) {
+            console.error('Error updating electricity reading:', error);
+            throw error;
+        }
+    }
+
+    // Delete electricity reading
+    async deleteElectricityReading(id) {
+        try {
+            const { data, error } = await this.supabase
+                .from('electricity_management')
+                .delete()
+                .eq('id', id)
+                .select();
+            
+            if (error) throw error;
+            return data[0];
+        } catch (error) {
+            console.error('Error deleting electricity reading:', error);
+            throw error;
+        }
+    }
+
+    // Get electricity consumption summary
+    async getConsumptionSummary() {
+        try {
+            const { data, error } = await this.supabase
+                .from('electricity_consumption_summary')
+                .select('*');
+            
+            if (error) throw error;
+            return data;
+        } catch (error) {
+            console.error('Error fetching consumption summary:', error);
+            throw error;
+        }
+    }
+
+    // Get electricity bills
+    async getElectricityBills(limit = 10) {
+        try {
+            const { data, error } = await this.supabase
+                .from('electricity_bills')
+                .select(`
+                    *,
+                    buildings(name, location)
+                `)
+                .order('bill_date', { ascending: false })
+                .limit(limit);
+            
+            if (error) throw error;
+            return data;
+        } catch (error) {
+            console.error('Error fetching electricity bills:', error);
+            throw error;
+        }
+    }
+
+    // Token Management Functions (sesuai dengan tabel log_pengisian_token)
     
-    // Timeout after 5 seconds
-    setTimeout(() => {
-        clearInterval(checkConfig);
-        if (!window.SIHARAT_CONFIG) {
-            console.error('❌ Environment config not loaded after 5 seconds');
+    // Get token purchase logs
+    async getTokenPurchaseLogs(limit = 10) {
+        try {
+            const { data, error } = await this.supabase
+                .from('log_pengisian_token')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(limit);
+            
+            if (error) {
+                console.error('Supabase error:', error);
+                // Return empty array if table doesn't exist
+                if (error.code === 'PGRST116' || error.message.includes('relation "log_pengisian_token" does not exist')) {
+                    console.warn('Table log_pengisian_token does not exist, returning empty array');
+                    return [];
+                }
+                throw error;
+            }
+            
+            // Add petugas name to each log entry
+            const logsWithPetugas = (data || []).map(log => ({
+                ...log,
+                users: { name: 'Admin SI-HARAT' }
+            }));
+            
+            return logsWithPetugas;
+        } catch (error) {
+            console.error('Error fetching token purchase logs:', error);
+            // Return empty array on error for graceful degradation
+            return [];
         }
-    }, 5000);
-})
+    }
+
+    // Add new token purchase log
+    async addTokenPurchaseLog(logData) {
+        try {
+            const { data, error } = await this.supabase
+                .from('log_pengisian_token')
+                .insert([logData])
+                .select();
+            
+            if (error) {
+                throw error;
+            }
+            return data[0];
+        } catch (error) {
+            console.error('Error adding token purchase log:', error);
+            throw error;
+        }
+    }
+
+    // Update token purchase log
+    async updateTokenPurchaseLog(id, logData) {
+        try {
+            const { data, error } = await this.supabase
+                .from('log_pengisian_token')
+                .update(logData)
+                .eq('id', id)
+                .select();
+            
+            if (error) throw error;
+            return data[0];
+        } catch (error) {
+            console.error('Error updating token purchase log:', error);
+            throw error;
+        }
+    }
+
+    // Delete token purchase log
+    async deleteTokenPurchaseLog(id) {
+        try {
+            const { data, error } = await this.supabase
+                .from('log_pengisian_token')
+                .delete()
+                .eq('id', id)
+                .select();
+            
+            if (error) throw error;
+            return data[0];
+        } catch (error) {
+            console.error('Error deleting token purchase log:', error);
+            throw error;
+        }
+    }
+
+    // Get token purchase summary
+    async getTokenPurchaseSummary() {
+        try {
+            const { data, error } = await this.supabase
+                .from('log_pengisian_token')
+                .select(`
+                    id,
+                    nominal_pembelian,
+                    jumlah_kwh,
+                    tanggal_pengisian,
+                    created_at
+                `);
+            
+            if (error) throw error;
+            
+            // Calculate summary
+            const summary = {
+                total_purchases: data.length,
+                total_nominal: data.reduce((sum, item) => sum + parseFloat(item.nominal_pembelian || 0), 0),
+                total_kwh: data.reduce((sum, item) => sum + parseFloat(item.jumlah_kwh || 0), 0),
+                average_purchase: data.length > 0 ? data.reduce((sum, item) => sum + parseFloat(item.nominal_pembelian || 0), 0) / data.length : 0
+            };
+            
+            return summary;
+        } catch (error) {
+            console.error('Error fetching token purchase summary:', error);
+            throw error;
+        }
+    }
+}
+
+// Initialize API
+const electricityAPI = new ElectricityAPI();
+
+// Export for use in other files
+window.supabase = supabase;
+window.electricityAPI = electricityAPI;
+
+console.log('Supabase client and Electricity API initialized');
