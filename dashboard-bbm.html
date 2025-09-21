@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manajemen BBM | SI-HARAT Dashboard</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #1e40af;
+            --secondary-color: #3b82f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #06b6d4;
+        }
+
+        body {
+            background-color: #f8fafc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid var(--primary-color);
+            transition: transform 0.2s ease;
+            margin-bottom: 1.5rem;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stats-card.success {
+            border-left-color: var(--success-color);
+        }
+
+        .stats-card.warning {
+            border-left-color: var(--warning-color);
+        }
+
+        .stats-card.info {
+            border-left-color: var(--info-color);
+        }
+
+        .stats-card.danger {
+            border-left-color: var(--danger-color);
+        }
+
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .stats-icon.primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        }
+
+        .stats-icon.success {
+            background: linear-gradient(135deg, var(--success-color), #34d399);
+        }
+
+        .stats-icon.warning {
+            background: linear-gradient(135deg, var(--warning-color), #fbbf24);
+        }
+
+        .stats-icon.info {
+            background: linear-gradient(135deg, var(--info-color), #22d3ee);
+        }
+
+        .stats-icon.danger {
+            background: linear-gradient(135deg, var(--danger-color), #f87171);
+        }
+
+        .panel {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .panel-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .panel-body {
+            padding: 1.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+        }
+
+        .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .table th {
+            background-color: #f8fafc;
+            border-bottom: 2px solid #e5e7eb;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+        }
+
+        .modal-content {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1.5rem;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #e5e7eb;
+            padding: 1.5rem;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 1rem 0;
+        }
+
+        .filter-section {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .status-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-approved {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-rejected {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 768px) {
+            .stats-card {
+                margin-bottom: 1rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-gas-pump me-2"></i>
+                    Manajemen BBM
+                </h1>
+                <p class="text-muted mb-0">Sistem Pengelolaan Bahan Bakar Minyak</p>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addVehicleModal">
+                    <i class="fas fa-car me-2"></i>
+                    Tambah Kendaraan
+                </button>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addFuelLogModal">
+                    <i class="fas fa-plus me-2"></i>
+                    Tambah Log BBM
+                </button>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-lg-6 mb-3">
+                <div class="stats-card">
+                    <div class="d-flex align-items-center">
+                        <div class="stats-icon primary me-3">
+                            <i class="fas fa-gas-pump"></i>
+                        </div>
+                        <div>
+                            <h3 class="h4 mb-1" id="totalFuelLogs">0</h3>
+                            <p class="text-muted mb-0">Total Log BBM</p>
+                            <small class="text-primary">Bulan ini</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-lg-6 mb-3">
+                <div class="stats-card success">
+                    <div class="d-flex align-items-center">
+                        <div class="stats-icon success me-3">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div>
+                            <h3 class="h4 mb-1" id="approvedLogs">0</h3>
+                            <p class="text-muted mb-0">Disetujui</p>
+                            <small class="text-success">Tertunda</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-lg-6 mb-3">
+                <div class="stats-card warning">
+                    <div class="d-flex align-items-center">
+                        <div class="stats-icon warning me-3">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div>
+                            <h3 class="h4 mb-1" id="pendingLogs">0</h3>
+                            <p class="text-muted mb-0">Menunggu</p>
+                            <small class="text-warning">Persetujuan</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-lg-6 mb-3">
+                <div class="stats-card info">
+                    <div class="d-flex align-items-center">
+                        <div class="stats-icon info me-3">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div>
+                            <h3 class="h4 mb-1" id="totalCost">Rp 0</h3>
+                            <p class="text-muted mb-0">Total Biaya</p>
+                            <small class="text-info">Bulan ini</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters and Search -->
+        <div class="filter-section">
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" id="statusFilter">
+                        <option value="">Semua Status</option>
+                        <option value="pending">Menunggu</option>
+                        <option value="approved">Disetujui</option>
+                        <option value="rejected">Ditolak</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Kendaraan</label>
+                    <select class="form-select" id="vehicleFilter">
+                        <option value="">Semua Kendaraan</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Tanggal Mulai</label>
+                    <input type="date" class="form-control" id="startDate">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Tanggal Akhir</label>
+                    <input type="date" class="form-control" id="endDate">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Cari</label>
+                    <input type="text" class="form-control" id="searchInput" placeholder="Cari berdasarkan NIP, nama pegawai, atau nomor polisi...">
+                </div>
+                <div class="col-md-6 mb-3 d-flex align-items-end">
+                    <button class="btn btn-outline-primary me-2" onclick="applyFilters()">
+                        <i class="fas fa-search me-2"></i>Filter
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="clearFilters()">
+                        <i class="fas fa-times me-2"></i>Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fuel Logs Table -->
+        <div class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    Daftar Log BBM
+                </h2>
+            </div>
+            <div class="panel-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="fuelLogsTable">
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Pegawai</th>
+                                <th>Kendaraan</th>
+                                <th>Jenis BBM</th>
+                                <th>Jumlah (L)</th>
+                                <th>Total Biaya</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fuelLogsTableBody">
+                            <tr>
+                                <td colspan="8" class="text-center">
+                                    <div class="loading-spinner mx-auto"></div>
+                                    <p class="mt-2">Memuat data...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title mb-0">
+                            <i class="fas fa-chart-pie me-2"></i>
+                            Penggunaan BBM per Kendaraan
+                        </h2>
+                    </div>
+                    <div class="panel-body">
+                        <div class="chart-container">
+                            <canvas id="vehicleUsageChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6 mb-4">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title mb-0">
+                            <i class="fas fa-chart-line me-2"></i>
+                            Trend Penggunaan BBM
+                        </h2>
+                    </div>
+                    <div class="panel-body">
+                        <div class="chart-container">
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Vehicle Modal -->
+    <div class="modal fade" id="addVehicleModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-car me-2"></i>
+                        Tambah Kendaraan Baru
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addVehicleForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Nomor Polisi <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="nomorPolisi" placeholder="Contoh: B 1234 ABC" required>
+                                <div class="form-text">Masukkan nomor polisi kendaraan</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Merk Kendaraan <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="merkKendaraan" placeholder="Contoh: Toyota, Honda, Suzuki" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Model Kendaraan <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="modelKendaraan" placeholder="Contoh: Avanza, Jazz, Ertiga" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Jenis Kendaraan <span class="text-danger">*</span></label>
+                                <select class="form-select" id="jenisKendaraan" required>
+                                    <option value="">Pilih Jenis Kendaraan</option>
+                                    <option value="Sedan">Sedan</option>
+                                    <option value="Hatchback">Hatchback</option>
+                                    <option value="SUV">SUV</option>
+                                    <option value="MPV">MPV</option>
+                                    <option value="Pickup">Pickup</option>
+                                    <option value="Truck">Truck</option>
+                                    <option value="Motor">Motor</option>
+                                    <option value="Bus">Bus</option>
+                                    <option value="Lainnya">Lainnya</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Tahun Pembuatan <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="tahunPembuatan" min="1990" max="2025" placeholder="Contoh: 2020" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Status Aktif</label>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="isActive" checked>
+                                    <label class="form-check-label" for="isActive">
+                                        Kendaraan Aktif
+                                    </label>
+                                </div>
+                                <div class="form-text">Nonaktifkan jika kendaraan tidak digunakan lagi</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Keterangan Tambahan</label>
+                            <textarea class="form-control" id="keteranganKendaraan" rows="3" placeholder="Tambahkan informasi tambahan tentang kendaraan (opsional)..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-success" onclick="saveVehicle()">
+                        <i class="fas fa-save me-2"></i>Simpan Kendaraan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Fuel Log Modal -->
+    <div class="modal fade" id="addFuelLogModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-plus me-2"></i>
+                        Tambah Log BBM
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addFuelLogForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Tanggal Pengisian <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="tanggalPengisian" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Waktu Pengisian <span class="text-danger">*</span></label>
+                                <input type="time" class="form-control" id="waktuPengisian" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Pegawai <span class="text-danger">*</span></label>
+                                <select class="form-select" id="employeeId" required>
+                                    <option value="">Pilih Pegawai</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Kendaraan <span class="text-danger">*</span></label>
+                                <select class="form-select" id="vehicleId" required>
+                                    <option value="">Pilih Kendaraan</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Kilometer Kendaraan <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="kilometerKendaraan" placeholder="Contoh: 50000" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Jenis BBM <span class="text-danger">*</span></label>
+                                <select class="form-select" id="jenisBbm" required>
+                                    <option value="">Pilih Jenis BBM</option>
+                                    <option value="Premium">Premium</option>
+                                    <option value="Pertalite">Pertalite</option>
+                                    <option value="Pertamax">Pertamax</option>
+                                    <option value="Solar">Solar</option>
+                                    <option value="Dexlite">Dexlite</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Jumlah Liter <span class="text-danger">*</span></label>
+                                <input type="number" step="0.01" class="form-control" id="jumlahLiter" placeholder="Contoh: 25.5" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Harga per Liter <span class="text-danger">*</span></label>
+                                <input type="number" step="0.01" class="form-control" id="hargaPerLiter" placeholder="Contoh: 15000" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Total Biaya</label>
+                                <input type="number" step="0.01" class="form-control" id="totalBiaya" readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Foto Kuitansi</label>
+                            <input type="file" class="form-control" id="fotoKuitansi" accept="image/*">
+                            <div class="form-text">Upload foto kuitansi pengisian BBM</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Keterangan</label>
+                            <textarea class="form-control" id="keterangan" rows="3" placeholder="Tambahkan keterangan jika diperlukan..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="saveFuelLog()">
+                        <i class="fas fa-save me-2"></i>Simpan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View/Edit Fuel Log Modal -->
+    <div class="modal fade" id="viewFuelLogModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-eye me-2"></i>
+                        Detail Log BBM
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="viewFuelLogContent">
+                    <!-- Content will be loaded dynamically -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-success" id="approveBtn" onclick="approveFuelLog()" style="display: none;">
+                        <i class="fas fa-check me-2"></i>Setujui
+                    </button>
+                    <button type="button" class="btn btn-danger" id="rejectBtn" onclick="rejectFuelLog()" style="display: none;">
+                        <i class="fas fa-times me-2"></i>Tolak
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="config/environment.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/supabase-client.js"></script>
+    
+    <script>
+        // Global variables
+        let supabase;
+        let fuelLogs = [];
+        let employees = [];
+        let vehicles = [];
+        let currentUser = null;
+        let selectedFuelLog = null;
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        async function initializeApp() {
+            try {
+                // Initialize Supabase
+                supabase = window.supabase.createClient(
+                    window.SIHARAT_CONFIG.supabase.url,
+                    window.SIHARAT_CONFIG.supabase.anonKey
+                );
+
+                // Get current user
+                const userData = sessionStorage.getItem('user');
+                if (!userData) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                currentUser = JSON.parse(userData);
+
+                // Load initial data
+                await loadEmployees();
+                await loadVehicles();
+                await loadFuelLogs();
+                await loadStatistics();
+                await loadCharts();
+
+                // Setup event listeners
+                setupEventListeners();
+
+            } catch (error) {
+                console.error('Error initializing app:', error);
+                showNotification('Error loading application', 'error');
+            }
+        }
+
+        function setupEventListeners() {
+            // Auto-calculate total cost
+            document.getElementById('jumlahLiter').addEventListener('input', calculateTotalCost);
+            document.getElementById('hargaPerLiter').addEventListener('input', calculateTotalCost);
+
+            // Search functionality
+            document.getElementById('searchInput').addEventListener('input', debounce(applyFilters, 300));
+
+            // Format license plate input
+            document.getElementById('nomorPolisi').addEventListener('input', function(e) {
+                let value = e.target.value.toUpperCase();
+                // Remove any non-alphanumeric characters except spaces
+                value = value.replace(/[^A-Z0-9\s]/g, '');
+                e.target.value = value;
+            });
+
+            // Validate year input
+            document.getElementById('tahunPembuatan').addEventListener('input', function(e) {
+                const year = parseInt(e.target.value);
+                const currentYear = new Date().getFullYear();
+                if (year > currentYear) {
+                    e.target.setCustomValidity('Tahun tidak boleh lebih dari tahun sekarang');
+                } else if (year < 1990) {
+                    e.target.setCustomValidity('Tahun tidak boleh kurang dari 1990');
+                } else {
+                    e.target.setCustomValidity('');
+                }
+            });
+        }
+
+        function calculateTotalCost() {
+            const jumlahLiter = parseFloat(document.getElementById('jumlahLiter').value) || 0;
+            const hargaPerLiter = parseFloat(document.getElementById('hargaPerLiter').value) || 0;
+            const totalBiaya = jumlahLiter * hargaPerLiter;
+            document.getElementById('totalBiaya').value = totalBiaya.toFixed(2);
+        }
+
+        async function loadEmployees() {
+            try {
+                const { data, error } = await supabase
+                    .from('employees')
+                    .select('id, name, nip, position')
+                    .eq('is_active', true)
+                    .order('name');
+
+                if (error) throw error;
+
+                employees = data || [];
+                
+                // Populate employee dropdowns
+                const employeeSelects = document.querySelectorAll('#employeeId, #employeeFilter');
+                employeeSelects.forEach(select => {
+                    select.innerHTML = '<option value="">Pilih Pegawai</option>';
+                    employees.forEach(employee => {
+                        select.innerHTML += `<option value="${employee.id}">${employee.name} (${employee.nip})</option>`;
+                    });
+                });
+
+            } catch (error) {
+                console.error('Error loading employees:', error);
+                showNotification('Error loading employees', 'error');
+            }
+        }
+
+        async function loadVehicles() {
+            try {
+                const { data, error } = await supabase
+                    .from('vehicles')
+                    .select('id, nomor_polisi, merk, model, jenis_kendaraan')
+                    .eq('is_active', true)
+                    .order('nomor_polisi');
+
+                if (error) throw error;
+
+                vehicles = data || [];
+                
+                // Populate vehicle dropdowns
+                const vehicleSelects = document.querySelectorAll('#vehicleId, #vehicleFilter');
+                vehicleSelects.forEach(select => {
+                    select.innerHTML = '<option value="">Pilih Kendaraan</option>';
+                    vehicles.forEach(vehicle => {
+                        select.innerHTML += `<option value="${vehicle.id}">${vehicle.nomor_polisi} - ${vehicle.merk} ${vehicle.model}</option>`;
+                    });
+                });
+
+            } catch (error) {
+                console.error('Error loading vehicles:', error);
+                showNotification('Error loading vehicles', 'error');
+            }
+        }
+
+        async function loadFuelLogs() {
+            try {
+                const { data, error } = await supabase
+                    .from('log_pengisian_bbm')
+                    .select(`
+                        *,
+                        employees!log_pengisian_bbm_employee_id_fkey(name, nip),
+                        vehicles!log_pengisian_bbm_vehicle_id_fkey(nomor_polisi, merk, model),
+                        approver:employees!log_pengisian_bbm_approved_by_fkey(name)
+                    `)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                fuelLogs = data || [];
+                displayFuelLogs(fuelLogs);
+
+            } catch (error) {
+                console.error('Error loading fuel logs:', error);
+                showNotification('Error loading fuel logs', 'error');
+            }
+        }
+
+        function displayFuelLogs(logs) {
+            const tbody = document.getElementById('fuelLogsTableBody');
+            
+            if (logs.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center text-muted">
+                            <i class="fas fa-inbox fa-2x mb-2"></i>
+                            <p>Tidak ada data log BBM</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = logs.map(log => `
+                <tr>
+                    <td>
+                        <div>
+                            <strong>${formatDate(log.tanggal_pengisian)}</strong>
+                            <br>
+                            <small class="text-muted">${log.waktu_pengisian}</small>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <strong>${log.employees?.name || 'N/A'}</strong>
+                            <br>
+                            <small class="text-muted">${log.employees?.nip || 'N/A'}</small>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <strong>${log.vehicles?.nomor_polisi || 'N/A'}</strong>
+                            <br>
+                            <small class="text-muted">${log.vehicles?.merk} ${log.vehicles?.model}</small>
+                        </div>
+                    </td>
+                    <td>${log.jenis_bbm}</td>
+                    <td>${log.jumlah_liter} L</td>
+                    <td><strong>Rp ${formatNumber(log.total_biaya)}</strong></td>
+                    <td>
+                        <span class="badge status-${log.status}">
+                            ${getStatusText(log.status)}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-sm btn-outline-primary" onclick="viewFuelLog('${log.id}')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            ${log.status === 'pending' ? `
+                                <button class="btn btn-sm btn-success" onclick="approveFuelLog('${log.id}')">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="rejectFuelLog('${log.id}')">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function loadStatistics() {
+            try {
+                const totalLogs = fuelLogs.length;
+                const approvedLogs = fuelLogs.filter(log => log.status === 'approved').length;
+                const pendingLogs = fuelLogs.filter(log => log.status === 'pending').length;
+                const totalCost = fuelLogs
+                    .filter(log => log.status === 'approved')
+                    .reduce((sum, log) => sum + (log.total_biaya || 0), 0);
+
+                document.getElementById('totalFuelLogs').textContent = totalLogs;
+                document.getElementById('approvedLogs').textContent = approvedLogs;
+                document.getElementById('pendingLogs').textContent = pendingLogs;
+                document.getElementById('totalCost').textContent = `Rp ${formatNumber(totalCost)}`;
+
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+            }
+        }
+
+        async function loadCharts() {
+            // Vehicle usage chart
+            const vehicleUsageData = {};
+            fuelLogs.forEach(log => {
+                if (log.status === 'approved' && log.vehicles) {
+                    const vehicle = `${log.vehicles.nomor_polisi}`;
+                    vehicleUsageData[vehicle] = (vehicleUsageData[vehicle] || 0) + log.jumlah_liter;
+                }
+            });
+
+            const vehicleUsageCtx = document.getElementById('vehicleUsageChart').getContext('2d');
+            new Chart(vehicleUsageCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(vehicleUsageData),
+                    datasets: [{
+                        data: Object.values(vehicleUsageData),
+                        backgroundColor: [
+                            '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Trend chart (last 7 days)
+            const last7Days = [];
+            const trendData = [];
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                last7Days.push(formatDate(dateStr));
+                
+                const dayLogs = fuelLogs.filter(log => 
+                    log.tanggal_pengisian === dateStr && log.status === 'approved'
+                );
+                const dayTotal = dayLogs.reduce((sum, log) => sum + (log.jumlah_liter || 0), 0);
+                trendData.push(dayTotal);
+            }
+
+            const trendCtx = document.getElementById('trendChart').getContext('2d');
+            new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: last7Days,
+                    datasets: [{
+                        label: 'Penggunaan BBM (Liter)',
+                        data: trendData,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        async function saveVehicle() {
+            try {
+                const vehicleData = {
+                    nomor_polisi: document.getElementById('nomorPolisi').value.trim().toUpperCase(),
+                    merk: document.getElementById('merkKendaraan').value.trim(),
+                    model: document.getElementById('modelKendaraan').value.trim(),
+                    jenis_kendaraan: document.getElementById('jenisKendaraan').value,
+                    tahun_pembuatan: parseInt(document.getElementById('tahunPembuatan').value),
+                    is_active: document.getElementById('isActive').checked
+                };
+
+                // Validate required fields
+                if (!vehicleData.nomor_polisi || !vehicleData.merk || !vehicleData.model || !vehicleData.jenis_kendaraan || !vehicleData.tahun_pembuatan) {
+                    showNotification('Mohon lengkapi semua field yang wajib diisi', 'error');
+                    return;
+                }
+
+                // Check if vehicle with same license plate already exists
+                const { data: existingVehicle, error: checkError } = await supabase
+                    .from('vehicles')
+                    .select('id')
+                    .eq('nomor_polisi', vehicleData.nomor_polisi)
+                    .single();
+
+                if (checkError && checkError.code !== 'PGRST116') { // PGRST116 = no rows returned
+                    throw checkError;
+                }
+
+                if (existingVehicle) {
+                    showNotification('Kendaraan dengan nomor polisi tersebut sudah terdaftar', 'error');
+                    return;
+                }
+
+                const { data, error } = await supabase
+                    .from('vehicles')
+                    .insert([vehicleData])
+                    .select();
+
+                if (error) throw error;
+
+                showNotification('Kendaraan berhasil ditambahkan', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('addVehicleModal')).hide();
+                document.getElementById('addVehicleForm').reset();
+                document.getElementById('isActive').checked = true; // Reset to default
+                
+                await loadVehicles();
+                await loadFuelLogs(); // Refresh fuel logs to update vehicle dropdown
+
+            } catch (error) {
+                console.error('Error saving vehicle:', error);
+                showNotification('Error saving vehicle: ' + error.message, 'error');
+            }
+        }
+
+        async function saveFuelLog() {
+            try {
+                const form = document.getElementById('addFuelLogForm');
+                const formData = new FormData(form);
+                
+                const fuelLogData = {
+                    tanggal_pengisian: document.getElementById('tanggalPengisian').value,
+                    waktu_pengisian: document.getElementById('waktuPengisian').value,
+                    employee_id: document.getElementById('employeeId').value,
+                    vehicle_id: document.getElementById('vehicleId').value,
+                    kilometer_kendaraan: parseFloat(document.getElementById('kilometerKendaraan').value),
+                    jenis_bbm: document.getElementById('jenisBbm').value,
+                    jumlah_liter: parseFloat(document.getElementById('jumlahLiter').value),
+                    harga_per_liter: parseFloat(document.getElementById('hargaPerLiter').value),
+                    total_biaya: parseFloat(document.getElementById('totalBiaya').value),
+                    keterangan: document.getElementById('keterangan').value,
+                    status: 'pending'
+                };
+
+                const { data, error } = await supabase
+                    .from('log_pengisian_bbm')
+                    .insert([fuelLogData])
+                    .select();
+
+                if (error) throw error;
+
+                showNotification('Log BBM berhasil ditambahkan', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('addFuelLogModal')).hide();
+                form.reset();
+                
+                await loadFuelLogs();
+                await loadStatistics();
+
+            } catch (error) {
+                console.error('Error saving fuel log:', error);
+                showNotification('Error saving fuel log', 'error');
+            }
+        }
+
+        async function viewFuelLog(logId) {
+            try {
+                const log = fuelLogs.find(l => l.id === logId);
+                if (!log) return;
+
+                selectedFuelLog = log;
+                
+                const content = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Informasi Pengisian</h6>
+                            <table class="table table-sm">
+                                <tr><td><strong>Tanggal:</strong></td><td>${formatDate(log.tanggal_pengisian)}</td></tr>
+                                <tr><td><strong>Waktu:</strong></td><td>${log.waktu_pengisian}</td></tr>
+                                <tr><td><strong>Kilometer:</strong></td><td>${log.kilometer_kendaraan} km</td></tr>
+                                <tr><td><strong>Jenis BBM:</strong></td><td>${log.jenis_bbm}</td></tr>
+                                <tr><td><strong>Jumlah:</strong></td><td>${log.jumlah_liter} Liter</td></tr>
+                                <tr><td><strong>Harga/Liter:</strong></td><td>Rp ${formatNumber(log.harga_per_liter)}</td></tr>
+                                <tr><td><strong>Total Biaya:</strong></td><td><strong>Rp ${formatNumber(log.total_biaya)}</strong></td></tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Informasi Pegawai & Kendaraan</h6>
+                            <table class="table table-sm">
+                                <tr><td><strong>Pegawai:</strong></td><td>${log.employees?.name || 'N/A'}</td></tr>
+                                <tr><td><strong>NIP:</strong></td><td>${log.employees?.nip || 'N/A'}</td></tr>
+                                <tr><td><strong>Kendaraan:</strong></td><td>${log.vehicles?.nomor_polisi || 'N/A'}</td></tr>
+                                <tr><td><strong>Merk/Model:</strong></td><td>${log.vehicles?.merk} ${log.vehicles?.model}</td></tr>
+                                <tr><td><strong>Status:</strong></td><td><span class="badge status-${log.status}">${getStatusText(log.status)}</span></td></tr>
+                                ${log.approver ? `<tr><td><strong>Disetujui oleh:</strong></td><td>${log.approver.name}</td></tr>` : ''}
+                            </table>
+                        </div>
+                    </div>
+                    ${log.keterangan ? `
+                        <div class="mt-3">
+                            <h6>Keterangan</h6>
+                            <p class="text-muted">${log.keterangan}</p>
+                        </div>
+                    ` : ''}
+                    ${log.foto_kuitansi ? `
+                        <div class="mt-3">
+                            <h6>Foto Kuitansi</h6>
+                            <img src="${log.foto_kuitansi}" class="img-fluid" style="max-height: 200px;">
+                        </div>
+                    ` : ''}
+                `;
+
+                document.getElementById('viewFuelLogContent').innerHTML = content;
+                
+                // Show/hide action buttons based on status and user role
+                const approveBtn = document.getElementById('approveBtn');
+                const rejectBtn = document.getElementById('rejectBtn');
+                
+                if (log.status === 'pending' && currentUser.role === 'admin') {
+                    approveBtn.style.display = 'inline-block';
+                    rejectBtn.style.display = 'inline-block';
+                } else {
+                    approveBtn.style.display = 'none';
+                    rejectBtn.style.display = 'none';
+                }
+
+                new bootstrap.Modal(document.getElementById('viewFuelLogModal')).show();
+
+            } catch (error) {
+                console.error('Error viewing fuel log:', error);
+                showNotification('Error loading fuel log details', 'error');
+            }
+        }
+
+        async function approveFuelLog(logId = null) {
+            try {
+                const id = logId || selectedFuelLog?.id;
+                if (!id) return;
+
+                const { error } = await supabase
+                    .from('log_pengisian_bbm')
+                    .update({ 
+                        status: 'approved',
+                        approved_by: currentUser.id,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', id);
+
+                if (error) throw error;
+
+                showNotification('Log BBM berhasil disetujui', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('viewFuelLogModal')).hide();
+                
+                await loadFuelLogs();
+                await loadStatistics();
+
+            } catch (error) {
+                console.error('Error approving fuel log:', error);
+                showNotification('Error approving fuel log', 'error');
+            }
+        }
+
+        async function rejectFuelLog(logId = null) {
+            try {
+                const id = logId || selectedFuelLog?.id;
+                if (!id) return;
+
+                const { error } = await supabase
+                    .from('log_pengisian_bbm')
+                    .update({ 
+                        status: 'rejected',
+                        approved_by: currentUser.id,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', id);
+
+                if (error) throw error;
+
+                showNotification('Log BBM berhasil ditolak', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('viewFuelLogModal')).hide();
+                
+                await loadFuelLogs();
+                await loadStatistics();
+
+            } catch (error) {
+                console.error('Error rejecting fuel log:', error);
+                showNotification('Error rejecting fuel log', 'error');
+            }
+        }
+
+        function applyFilters() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const vehicleFilter = document.getElementById('vehicleFilter').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+
+            let filteredLogs = fuelLogs;
+
+            if (statusFilter) {
+                filteredLogs = filteredLogs.filter(log => log.status === statusFilter);
+            }
+
+            if (vehicleFilter) {
+                filteredLogs = filteredLogs.filter(log => log.vehicle_id === vehicleFilter);
+            }
+
+            if (startDate) {
+                filteredLogs = filteredLogs.filter(log => log.tanggal_pengisian >= startDate);
+            }
+
+            if (endDate) {
+                filteredLogs = filteredLogs.filter(log => log.tanggal_pengisian <= endDate);
+            }
+
+            if (searchInput) {
+                filteredLogs = filteredLogs.filter(log => 
+                    (log.employees?.name || '').toLowerCase().includes(searchInput) ||
+                    (log.employees?.nip || '').toLowerCase().includes(searchInput) ||
+                    (log.vehicles?.nomor_polisi || '').toLowerCase().includes(searchInput)
+                );
+            }
+
+            displayFuelLogs(filteredLogs);
+        }
+
+        function clearFilters() {
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('vehicleFilter').value = '';
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            document.getElementById('searchInput').value = '';
+            
+            displayFuelLogs(fuelLogs);
+        }
+
+        // Utility functions
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('id-ID', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
+        function formatNumber(number) {
+            if (!number) return '0';
+            return new Intl.NumberFormat('id-ID').format(number);
+        }
+
+        function getStatusText(status) {
+            const statusMap = {
+                'pending': 'Menunggu',
+                'approved': 'Disetujui',
+                'rejected': 'Ditolak'
+            };
+            return statusMap[status] || status;
+        }
+
+        function showNotification(message, type = 'info') {
+            const alertClass = type === 'error' ? 'danger' : type;
+            const iconClass = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle';
+            
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${alertClass} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notification.innerHTML = `
+                <i class="fas fa-${iconClass} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+    </script>
+</body>
+</html>

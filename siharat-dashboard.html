@@ -817,10 +817,10 @@
                     pageTitle.textContent = 'Manajemen BBM';
                     setTimeout(() => {
                         contentArea.innerHTML = `
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle me-2"></i>
-                                Fitur manajemen BBM akan segera tersedia.
-                            </div>
+                            <iframe src="dashboard-bbm.html" class="content-iframe" 
+                                    onload="this.style.opacity='1'" 
+                                    style="opacity:0; transition: opacity 0.3s ease;">
+                            </iframe>
                         `;
                     }, 500);
                     break;
