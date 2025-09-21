@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buat Notulen Baru - NotulenPro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2563eb; --primary-hover: #1d4ed8;
+            --background-color: #f4f7fa; --card-background-color: #ffffff;
+            --text-primary-color: #1a202c; --text-secondary-color: #6b7280;
+            --border-color: #e5e7eb;
+            --header-dark-bg: #111827;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.05);
+        }
+        [data-theme="dark"] {
+            --primary-color: #3b82f6; --primary-hover: #2563eb;
+            --background-color: #111827; --card-background-color: #1f2937;
+            --text-primary-color: #f9fafb; --text-secondary-color: #9ca3af;
+            --border-color: #374151;
+            --header-dark-bg: #1f2937;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .container { max-width: 1024px; margin: 0 auto; padding: 0 24px; }
+
+        .main-header {
+            background-color: var(--header-dark-bg);
+            padding: 16px 0;
+            position: sticky; top: 0; z-index: 50;
+        }
+        .header-content { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.8rem; font-weight: 700; color: white; text-decoration: none; }
+        .main-nav { display: flex; gap: 32px; }
+        .main-nav a {
+            color: #d1d5db; text-decoration: none; font-weight: 500;
+            padding: 8px 0; border-bottom: 2px solid transparent;
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .main-nav a:hover, .main-nav a.active { color: white; border-color: var(--primary-color); }
+        .header-right { display: flex; align-items: center; gap: 24px; }
+        #theme-toggle { cursor: pointer; font-size: 1.25rem; color: #9ca3af; }
+        .user-profile {
+            width: 40px; height: 40px; background-color: var(--primary-color);
+            color: white; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; font-weight: 600;
+        }
+
+        .main-content {
+            padding: 40px 0;
+        }
+        .page-title h1 {
+            font-size: 2.25rem;
+            margin-bottom: 8px;
+        }
+        .page-title p {
+            font-size: 1.1rem;
+            color: var(--text-secondary-color);
+        }
+        
+        .form-section {
+            background-color: var(--card-background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 32px;
+            margin-top: 32px;
+        }
+        .form-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .form-group label {
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary-color);
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .add-item-button {
+            background: none;
+            border: 1px dashed var(--border-color);
+            color: var(--primary-color);
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        
+        .dynamic-list .list-item {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 16px;
+            margin-top: 32px;
+        }
+        
+        .button {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            border: none;
+        }
+        .button-secondary {
+            background-color: var(--background-color);
+            color: var(--text-primary-color);
+            border: 1px solid var(--border-color);
+        }
+        .button-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container header-content">
+            <a href="#" class="logo">NotulenPro</a>
+            <nav class="main-nav">
+                <a href="#">Beranda</a>
+                <a href="#">Rapat Saya</a>
+                <a href="#" class="active">Buat Notulen</a>
+            </nav>
+            <div class="header-right">
+                <div id="theme-toggle">🌙</div>
+                <div class="user-profile">AH</div>
+            </div>
+        </div>
+    </header>
+    
+    <main class="main-content container">
+        <div class="page-title">
+            <h1>Buat Notulen Rapat Baru</h1>
+            <p>Isi form di bawah untuk membuat notulen rapat yang terstruktur dan profesional.</p>
+        </div>
+
+        <form>
+            <div class="form-section">
+                <h2><i class="fa-solid fa-circle-info"></i> Informasi Rapat</h2>
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="judul">Judul Rapat *</label>
+                        <input type="text" id="judul" placeholder="Contoh: Rapat Mingguan Tim Marketing">
+                    </div>
+                    <div class="form-group">
+                        <label for="lokasi">Lokasi</label>
+                        <input type="text" id="lokasi" placeholder="Contoh: Ruang Rapat A / Zoom">
+                    </div>
+                    <div class="form-group">
+                        <label for="pemimpin">Pemimpin Rapat</label>
+                        <input type="text" id="pemimpin" placeholder="Nama pemimpin rapat">
+                    </div>
+                    <div class="form-group">
+                        <label for="tanggal">Tanggal *</label>
+                        <input type="date" id="tanggal">
+                    </div>
+                    <div class="form-group">
+                        <label for="waktu-mulai">Waktu Mulai *</label>
+                        <input type="time" id="waktu-mulai">
+                    </div>
+                    <div class="form-group">
+                        <label for="waktu-selesai">Waktu Selesai</label>
+                        <input type="time" id="waktu-selesai">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2><i class="fa-solid fa-users"></i> Peserta Rapat</h2>
+                <div class="dynamic-list" id="peserta-list"></div>
+                <button type="button" class="add-item-button"><i class="fa-solid fa-plus"></i> Tambah Peserta</button>
+            </div>
+
+            <div class="form-section">
+                <h2><i class="fa-solid fa-list-check"></i> Agenda & Pembahasan</h2>
+                <div class="dynamic-list" id="agenda-list"></div>
+                <button type="button" class="add-item-button"><i class="fa-solid fa-plus"></i> Tambah Agenda</button>
+            </div>
+
+            <div class="form-section">
+                <h2><i class="fa-solid fa-bullseye"></i> Action Items (Tugas)</h2>
+                <div class="dynamic-list" id="tugas-list"></div>
+                <button type="button" class="add-item-button"><i class="fa-solid fa-plus"></i> Tambah Action Item</button>
+            </div>
+            
+            <div class="form-section">
+                <h2><i class="fa-solid fa-gavel"></i> Keputusan & Rapat Selanjutnya</h2>
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="keputusan">Keputusan yang Diambil</label>
+                        <textarea id="keputusan" placeholder="Catat keputusan penting yang diambil dalam rapat..."></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="rapat-selanjutnya">Rapat Selanjutnya</label>
+                        <textarea id="rapat-selanjutnya" placeholder="Rencana rapat selanjutnya, tanggal, dan topik yang akan dibahas..."></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <a href="#" class="button button-secondary">Batal</a>
+                <button type="submit" class="button button-primary">Simpan Notulen</button>
+            </div>
+        </form>
+    </main>
+
+    <script>
+        // Script Dark Mode (Sama seperti Dashboard)
+        const themeToggle = document.getElementById('theme-toggle');
+        const htmlEl = document.documentElement;
+        const currentTheme = localStorage.getItem('theme');
+        if (currentTheme) {
+            htmlEl.setAttribute('data-theme', currentTheme);
+            if (currentTheme === 'dark') themeToggle.textContent = '☀️';
+        }
+        themeToggle.addEventListener('click', () => {
+            if (htmlEl.getAttribute('data-theme') === 'dark') {
+                htmlEl.removeAttribute('data-theme');
+                themeToggle.textContent = '🌙';
+                localStorage.setItem('theme', 'light');
+            } else {
+                htmlEl.setAttribute('data-theme', 'dark');
+                themeToggle.textContent = '☀️';
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+    </script>
+</body>
+</html>

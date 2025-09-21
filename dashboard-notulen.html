@@ -1,0 +1,1779 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Notulen | SI-HARAT</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- jsPDF for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Environment Config -->
+    <script src="config/environment.js"></script>
+    <!-- Supabase Client -->
+    <script src="assets/js/supabase-client.js"></script>
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #1e40af;
+            --secondary-color: #3b82f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #06b6d4;
+        }
+
+        body {
+            background-color: #f8fafc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+
+        .container-fluid {
+            padding: 2rem;
+        }
+
+        .nav-tabs .nav-link {
+            border: none;
+            border-radius: 10px 10px 0 0;
+            color: #6b7280;
+            font-weight: 600;
+            padding: 1rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: var(--primary-color);
+            background-color: #f8fafc;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color);
+            background-color: white;
+            border-bottom: 3px solid var(--primary-color);
+        }
+
+        .tab-content {
+            background: white;
+            border-radius: 0 15px 15px 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+        }
+
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 1.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30, 64, 175, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning-color) 0%, #d97706 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger-color) 0%, #dc2626 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+        }
+
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e5e7eb;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(30, 64, 175, 0.25);
+        }
+
+        .table {
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .table thead th {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border: none;
+            padding: 1rem;
+            font-weight: 600;
+        }
+
+        .table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-color: #e5e7eb;
+        }
+
+        .badge {
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+        }
+
+        .notification.show {
+            animation: slideInRight 0.3s ease;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .participant-tag {
+            background: linear-gradient(135deg, var(--info-color) 0%, #0891b2 100%);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.875rem;
+            margin: 0.25rem;
+            display: inline-block;
+        }
+
+        .agenda-item {
+            background: #f8fafc;
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .action-item {
+            background: #fef3c7;
+            border-left: 4px solid var(--warning-color);
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .decision-item {
+            background: #d1fae5;
+            border-left: 4px solid var(--success-color);
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stats-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .image-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .image-preview-item {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #e5e7eb;
+        }
+
+        .image-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .image-preview-item .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(239, 68, 68, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-preview-item .remove-btn:hover {
+            background: rgba(239, 68, 68, 1);
+        }
+
+        .image-gallery {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .image-gallery-item {
+            width: 150px;
+            text-align: center;
+        }
+
+        .image-gallery-item img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+            transition: transform 0.2s ease;
+        }
+
+        .image-gallery-item img:hover {
+            transform: scale(1.05);
+            border-color: var(--primary-color);
+        }
+
+        .image-caption {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 5px;
+            word-break: break-all;
+        }
+
+        .image-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .image-modal img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 8px;
+        }
+
+        .image-modal-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+            }
+            
+            .sidebar .nav-link span {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Content -->
+    <div class="container-fluid">
+
+        <!-- Navigation Tabs -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <ul class="nav nav-tabs" id="notulenTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button" role="tab">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="add-tab" data-bs-toggle="tab" data-bs-target="#add-notulen" type="button" role="tab">
+                            <i class="fas fa-plus-circle me-2"></i>Tambah Notulen
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="list-tab" data-bs-toggle="tab" data-bs-target="#list-notulen" type="button" role="tab">
+                            <i class="fas fa-list me-2"></i>Daftar Notulen
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="search-tab" data-bs-toggle="tab" data-bs-target="#search" type="button" role="tab">
+                            <i class="fas fa-search me-2"></i>Cari Notulen
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="notulenTabContent">
+
+            <!-- Dashboard Tab -->
+            <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card stats-card">
+                        <div class="stats-number" id="totalNotulen">0</div>
+                        <div class="stats-label">Total Notulen</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stats-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <div class="stats-number" id="notulenBulan">0</div>
+                        <div class="stats-label">Bulan Ini</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stats-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        <div class="stats-number" id="rapatHari">0</div>
+                        <div class="stats-label">Hari Ini</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stats-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                        <div class="stats-number" id="pesertaTotal">0</div>
+                        <div class="stats-label">Total Peserta</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Notulen -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-clock me-2"></i>
+                                Notulen Terbaru
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Judul Rapat</th>
+                                            <th>Tanggal</th>
+                                            <th>Pemimpin</th>
+                                            <th>Lokasi</th>
+                                            <th>Peserta</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recentNotulenTable">
+                                        <!-- Data will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+            <!-- Add Notulen Tab -->
+            <div class="tab-pane fade" id="add-notulen" role="tabpanel">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        Tambah Notulen Rapat Baru
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="notulenForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="judulRapat" class="form-label">Judul Rapat *</label>
+                                <input type="text" class="form-control" id="judulRapat" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="lokasi" class="form-label">Lokasi *</label>
+                                <input type="text" class="form-control" id="lokasi" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="tanggalRapat" class="form-label">Tanggal Rapat *</label>
+                                <input type="date" class="form-control" id="tanggalRapat" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="waktuMulai" class="form-label">Waktu Mulai *</label>
+                                <input type="time" class="form-control" id="waktuMulai" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="waktuSelesai" class="form-label">Waktu Selesai *</label>
+                                <input type="time" class="form-control" id="waktuSelesai" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="pemimpinRapat" class="form-label">Pemimpin Rapat *</label>
+                                <input type="text" class="form-control" id="pemimpinRapat" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="pesertaRapat" class="form-label">Peserta Rapat (pisahkan dengan koma) *</label>
+                                <textarea class="form-control" id="pesertaRapat" rows="3" placeholder="Nama Peserta 1, Nama Peserta 2, Nama Peserta 3" required></textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="agendaPembahasan" class="form-label">Agenda Pembahasan *</label>
+                            <textarea class="form-control" id="agendaPembahasan" rows="4" placeholder="1. Pembahasan agenda pertama&#10;2. Pembahasan agenda kedua&#10;3. Pembahasan agenda ketiga" required></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="actionItems" class="form-label">Action Items (Tugas)</label>
+                            <textarea class="form-control" id="actionItems" rows="4" placeholder="1. Tugas 1 - Penanggung Jawab: Nama&#10;2. Tugas 2 - Penanggung Jawab: Nama&#10;3. Tugas 3 - Penanggung Jawab: Nama"></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="keputusan" class="form-label">Keputusan yang Diambil</label>
+                            <textarea class="form-control" id="keputusan" rows="4" placeholder="1. Keputusan pertama&#10;2. Keputusan kedua&#10;3. Keputusan ketiga"></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="gambarNotulen" class="form-label">Upload Gambar (Opsional)</label>
+                            <input type="file" class="form-control" id="gambarNotulen" accept="image/*" multiple>
+                            <div class="form-text">Anda dapat mengupload beberapa gambar. Format yang didukung: JPG, PNG, GIF. Maksimal 5MB per file.</div>
+                            <div id="imagePreview" class="mt-2"></div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <button type="button" class="btn btn-info" onclick="testDatabaseConnection()">
+                                <i class="fas fa-database me-2"></i>Test Database
+                            </button>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                                    <i class="fas fa-undo me-2"></i>Reset
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Simpan Notulen
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+            <!-- List Notulen Tab -->
+            <div class="tab-pane fade" id="list-notulen" role="tabpanel">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list me-2"></i>
+                            Daftar Notulen Rapat
+                        </h5>
+                        <div class="d-flex gap-2">
+                            <input type="text" class="form-control" id="searchInput" placeholder="Cari notulen..." style="width: 300px;">
+                            <button class="btn btn-primary" onclick="searchNotulen()">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            <button class="btn btn-success" onclick="exportAllNotulenToPDF()" title="Export Semua Notulen ke PDF">
+                                <i class="fas fa-file-pdf"></i> Export PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Judul Rapat</th>
+                                    <th>Tanggal</th>
+                                    <th>Waktu</th>
+                                    <th>Pemimpin</th>
+                                    <th>Lokasi</th>
+                                    <th>Peserta</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="notulenTable">
+                                <!-- Data will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+            <!-- Search Tab -->
+            <div class="tab-pane fade" id="search" role="tabpanel">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-search me-2"></i>
+                        Pencarian Notulen
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <label for="searchJudul" class="form-label">Judul Rapat</label>
+                            <input type="text" class="form-control" id="searchJudul" placeholder="Masukkan judul rapat">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="searchTanggal" class="form-label">Tanggal</label>
+                            <input type="date" class="form-control" id="searchTanggal">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="searchPemimpin" class="form-label">Pemimpin Rapat</label>
+                            <input type="text" class="form-control" id="searchPemimpin" placeholder="Masukkan nama pemimpin">
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button class="btn btn-primary" onclick="performSearch()">
+                            <i class="fas fa-search me-2"></i>Cari
+                        </button>
+                    </div>
+                    <div id="searchResults" class="mt-4">
+                        <!-- Search results will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- View Notulen Modal -->
+    <div class="modal fade" id="viewNotulenModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detail Notulen Rapat</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="viewNotulenContent">
+                    <!-- Content will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-primary" onclick="editNotulen()">Edit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification" style="display: none;">
+        <div class="alert alert-dismissible fade show" role="alert">
+            <span id="notificationMessage"></span>
+            <button type="button" class="btn-close" onclick="hideNotification()"></button>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        let currentUser = null;
+        let notulenData = [];
+        let selectedImages = [];
+        
+        // Debug: Check if NotulenAPI is available
+        console.log('Checking NotulenAPI availability:', typeof window.notulenAPI);
+        console.log('Available APIs:', {
+            supabase: typeof window.supabase,
+            electricityAPI: typeof window.electricityAPI,
+            notulenAPI: typeof window.notulenAPI
+        });
+        
+        // Test Supabase connection
+        async function testSupabaseConnection() {
+            try {
+                console.log('Testing Supabase connection...');
+                console.log('Supabase client:', window.supabase);
+                console.log('Supabase URL:', window.supabase.supabaseUrl);
+                console.log('Supabase Key:', window.supabase.supabaseKey ? 'Present' : 'Missing');
+                
+                const { data, error } = await window.supabase
+                    .from('notulen_rapat')
+                    .select('*')
+                    .limit(1);
+                
+                if (error) {
+                    console.error('Supabase connection test failed:', error);
+                    showNotification('Koneksi ke database gagal: ' + error.message, 'error');
+                } else {
+                console.log('Supabase connection test successful, data:', data);
+                // Notification removed - no longer needed
+                }
+            } catch (err) {
+                console.error('Supabase connection test error:', err);
+                showNotification('Error testing database connection: ' + err.message, 'error');
+            }
+        }
+        
+        // Connection test removed - no longer needed
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            setupImageUpload();
+        });
+
+        // Setup image upload functionality
+        function setupImageUpload() {
+            const imageInput = document.getElementById('gambarNotulen');
+            const previewContainer = document.getElementById('imagePreview');
+
+            imageInput.addEventListener('change', function(e) {
+                const files = Array.from(e.target.files);
+                
+                // Validate files
+                const validFiles = files.filter(file => {
+                    const isValidType = file.type.startsWith('image/');
+                    const isValidSize = file.size <= 5 * 1024 * 1024; // 5MB
+                    
+                    if (!isValidType) {
+                        showNotification('File ' + file.name + ' bukan format gambar yang valid', 'error');
+                        return false;
+                    }
+                    
+                    if (!isValidSize) {
+                        showNotification('File ' + file.name + ' terlalu besar (maksimal 5MB)', 'error');
+                        return false;
+                    }
+                    
+                    return true;
+                });
+
+                // Add to selected images
+                selectedImages = [...selectedImages, ...validFiles];
+                
+                // Update preview
+                updateImagePreview();
+            });
+        }
+
+        function updateImagePreview() {
+            const previewContainer = document.getElementById('imagePreview');
+            previewContainer.innerHTML = '';
+
+            selectedImages.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const previewItem = document.createElement('div');
+                    previewItem.className = 'image-preview-item';
+                    previewItem.innerHTML = `
+                        <img src="${e.target.result}" alt="Preview ${index + 1}">
+                        <button type="button" class="remove-btn" onclick="removeImage(${index})">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    previewContainer.appendChild(previewItem);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function removeImage(index) {
+            selectedImages.splice(index, 1);
+            updateImagePreview();
+        }
+
+        // Convert images to base64 for storage
+        function convertImagesToBase64() {
+            return new Promise((resolve) => {
+                if (selectedImages.length === 0) {
+                    resolve([]);
+                    return;
+                }
+
+                const base64Images = [];
+                let processed = 0;
+
+                selectedImages.forEach((file, index) => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        base64Images[index] = {
+                            name: file.name,
+                            data: e.target.result,
+                            type: file.type
+                        };
+                        processed++;
+
+                        if (processed === selectedImages.length) {
+                            resolve(base64Images);
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                });
+            });
+        }
+
+        async function initializeApp() {
+            try {
+                // Wait for NotulenAPI to be available
+                let retries = 0;
+                while (!window.notulenAPI && retries < 10) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    retries++;
+                }
+                
+                if (!window.notulenAPI) {
+                    throw new Error('NotulenAPI not available. Please check if supabase-client.js is loaded correctly.');
+                }
+                
+                // Check authentication
+                await checkAuth();
+                
+                // Load initial data
+                await loadDashboardData();
+                
+                console.log('Notulen dashboard initialized successfully');
+            } catch (error) {
+                console.error('Error initializing app:', error);
+                showNotification('Error initializing app: ' + error.message, 'error');
+            }
+        }
+
+        async function checkAuth() {
+            try {
+                // Get user from sessionStorage
+                const userData = sessionStorage.getItem('user');
+                if (!userData) {
+                    // Create dummy user for testing if no user is logged in
+                    currentUser = {
+                        id: generateUUID(),
+                        name: 'Admin SI-HARAT',
+                        role: 'admin',
+                        email: 'admin@siharat.com'
+                    };
+                    console.log('Using dummy user for testing:', currentUser);
+                } else {
+                    try {
+                        currentUser = JSON.parse(userData);
+                        
+                        // Validate and fix user ID if needed
+                        if (!currentUser.id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(currentUser.id)) {
+                            console.log('Invalid user ID detected, generating new UUID');
+                            currentUser.id = generateUUID();
+                            sessionStorage.setItem('user', JSON.stringify(currentUser));
+                        }
+                    } catch (error) {
+                        console.log('Error parsing user data, using dummy user');
+                        currentUser = {
+                            id: generateUUID(),
+                            name: 'Admin SI-HARAT',
+                            role: 'admin',
+                            email: 'admin@siharat.com'
+                        };
+                    }
+                }
+
+            } catch (error) {
+                console.error('Auth check error:', error);
+                // Create dummy user as fallback
+                currentUser = {
+                    id: generateUUID(),
+                    name: 'Admin SI-HARAT', role: 'admin', email: 'admin@siharat.com'
+                };
+            }
+        }
+
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        async function loadDashboardData() {
+            try {
+                console.log('Loading dashboard data from database...');
+                
+                // Check if NotulenAPI is available
+                if (!window.notulenAPI) {
+                    console.warn('NotulenAPI not available, using dummy data');
+                    notulenData = getDummyNotulenData();
+                    updateStatistics();
+                    loadRecentNotulen();
+                    loadNotulenTable();
+                    return;
+                }
+                
+                // Load notulen data using NotulenAPI
+                notulenData = await window.notulenAPI.getNotulen();
+                console.log('Loaded notulen data:', notulenData.length, 'records');
+                
+                // If no data from database, use dummy data for testing
+                if (notulenData.length === 0) {
+                    console.log('No data from database, using dummy data');
+                    notulenData = getDummyNotulenData();
+                }
+
+                // Update all components
+                updateStatistics();
+                loadRecentNotulen();
+                loadNotulenTable();
+                
+                console.log('Dashboard data loaded successfully');
+                
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                // Use dummy data for testing
+                notulenData = getDummyNotulenData();
+                updateStatistics();
+                loadRecentNotulen();
+                loadNotulenTable();
+            }
+        }
+
+        function getDummyNotulenData() {
+            return [
+                {
+                    id: 1,
+                    judul_rapat: 'Rapat Koordinasi Bulanan',
+                    lokasi: 'Ruang Meeting A',
+                    tanggal_rapat: '2024-01-15',
+                    waktu_mulai: '09:00',
+                    waktu_selesai: '11:00',
+                    pemimpin_rapat: 'John Doe',
+                    peserta_rapat: 'Alice, Bob, Charlie',
+                    agenda_pembahasan: '1. Review progress bulan lalu\n2. Planning bulan depan\n3. Budget allocation',
+                    action_items: '1. Alice - Prepare monthly report\n2. Bob - Update project timeline',
+                    keputusan_diambil: '1. Approved budget increase\n2. New project timeline agreed',
+                    created_at: new Date().toISOString()
+                },
+                {
+                    id: 2,
+                    judul_rapat: 'Rapat Evaluasi Proyek',
+                    lokasi: 'Ruang Meeting B',
+                    tanggal_rapat: '2024-01-10',
+                    waktu_mulai: '14:00',
+                    waktu_selesai: '16:00',
+                    pemimpin_rapat: 'Jane Smith',
+                    peserta_rapat: 'David, Eve, Frank',
+                    agenda_pembahasan: '1. Project status review\n2. Risk assessment\n3. Next steps',
+                    action_items: '1. David - Risk mitigation plan\n2. Eve - Status report',
+                    keputusan_diambil: '1. Project on track\n2. Additional resources approved',
+                    created_at: new Date().toISOString()
+                }
+            ];
+        }
+
+        function updateStatistics() {
+            const total = notulenData.length;
+            const today = new Date().toISOString().split('T')[0];
+            const thisMonth = new Date().getMonth();
+            const thisYear = new Date().getFullYear();
+            
+            const bulanIni = notulenData.filter(notulen => {
+                const notulenDate = new Date(notulen.tanggal_rapat);
+                return notulenDate.getMonth() === thisMonth && notulenDate.getFullYear() === thisYear;
+            }).length;
+            
+            const hariIni = notulenData.filter(notulen => notulen.tanggal_rapat === today).length;
+            
+            const totalPeserta = notulenData.reduce((total, notulen) => {
+                return total + (notulen.peserta_rapat ? notulen.peserta_rapat.split(',').length : 0);
+            }, 0);
+
+            document.getElementById('totalNotulen').textContent = total;
+            document.getElementById('notulenBulan').textContent = bulanIni;
+            document.getElementById('rapatHari').textContent = hariIni;
+            document.getElementById('pesertaTotal').textContent = totalPeserta;
+        }
+
+        function loadRecentNotulen() {
+            const tbody = document.getElementById('recentNotulenTable');
+            tbody.innerHTML = '';
+
+            const recentNotulen = notulenData.slice(0, 5); // Show only 5 most recent
+
+            recentNotulen.forEach(notulen => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${notulen.judul_rapat}</td>
+                    <td>${formatDate(notulen.tanggal_rapat)}</td>
+                    <td>${notulen.pemimpin_rapat}</td>
+                    <td>${notulen.lokasi}</td>
+                    <td>
+                        <span class="badge bg-info">${notulen.peserta_rapat ? notulen.peserta_rapat.split(',').length : 0} peserta</span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="viewNotulen(${notulen.id})">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Tab event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add event listeners for tab changes
+            document.getElementById('list-tab').addEventListener('shown.bs.tab', function() {
+                console.log('List tab activated, refreshing data...');
+                loadNotulenTable();
+            });
+            
+            document.getElementById('dashboard-tab').addEventListener('shown.bs.tab', function() {
+                console.log('Dashboard tab activated, refreshing data...');
+                loadDashboardData();
+            });
+            
+            document.getElementById('search-tab').addEventListener('shown.bs.tab', function() {
+                console.log('Search tab activated, refreshing data...');
+                // Clear search results when switching to search tab
+                document.getElementById('searchResults').innerHTML = '';
+            });
+        });
+
+        // Form handling
+        document.getElementById('notulenForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            try {
+                // Convert images to base64
+                const images = await convertImagesToBase64();
+                
+                // Helper function untuk mendapatkan nilai form dengan default
+                const getFormValue = (elementId, defaultValue = '') => {
+                    const element = document.getElementById(elementId);
+                    if (!element) {
+                        console.warn(`Element with ID '${elementId}' not found`);
+                        return defaultValue;
+                    }
+                    
+                    const value = element.value;
+                    console.log(`Getting value for ${elementId}:`, { value, type: typeof value });
+                    
+                    // Ensure we return a string
+                    return (value !== null && value !== undefined) ? String(value) : defaultValue;
+                };
+                
+                const formData = {
+                    judul_rapat: getFormValue('judulRapat'),
+                    lokasi: getFormValue('lokasi'),
+                    tanggal_rapat: getFormValue('tanggalRapat'),
+                    waktu_mulai: getFormValue('waktuMulai'),
+                    waktu_selesai: getFormValue('waktuSelesai'),
+                    pemimpin_rapat: getFormValue('pemimpinRapat'),
+                    peserta_rapat: getFormValue('pesertaRapat'),
+                    agenda_pembahasan: getFormValue('agendaPembahasan'),
+                    action_items: getFormValue('actionItems'),
+                    keputusan_diambil: getFormValue('keputusan'),
+                    gambar_notulen: images // Tambahkan gambar
+                };
+
+                // Try to save using NotulenAPI
+                try {
+                    if (!window.notulenAPI) {
+                        throw new Error('NotulenAPI tidak tersedia. Pastikan supabase-client.js dimuat dengan benar.');
+                    }
+                    
+                    // Validasi data sebelum kirim
+                    console.log('Validating form data...');
+                    console.log('Form data types:', Object.keys(formData).map(key => ({
+                        key,
+                        type: typeof formData[key],
+                        value: formData[key]
+                    })));
+                    
+                    if (!formData.judul_rapat || !formData.tanggal_rapat) {
+                        throw new Error('Judul rapat dan tanggal rapat harus diisi');
+                    }
+                    
+                    // Bersihkan data dari field kosong dengan pendekatan yang lebih aman
+                    const cleanData = {};
+                    
+                    try {
+                        Object.keys(formData).forEach(key => {
+                            try {
+                                const value = formData[key];
+                                console.log(`Processing field ${key}:`, { value, type: typeof value });
+                                
+                                // Skip null/undefined values
+                                if (value === null || value === undefined) {
+                                    console.log(`Skipping ${key}: null/undefined`);
+                                    return;
+                                }
+                                
+                                // Handle different data types
+                                if (typeof value === 'string') {
+                                    const trimmed = value.trim();
+                                    if (trimmed !== '') {
+                                        cleanData[key] = trimmed;
+                                        console.log(`Added string field ${key}: "${trimmed}"`);
+                                    }
+                                } else if (Array.isArray(value)) {
+                                    // Handle arrays (like gambar_notulen)
+                                    if (value.length > 0) {
+                                        cleanData[key] = value;
+                                        console.log(`Added array field ${key}:`, value.length, 'items');
+                                    }
+                                } else if (typeof value === 'object') {
+                                    // Handle objects
+                                    cleanData[key] = value;
+                                    console.log(`Added object field ${key}:`, value);
+                                } else {
+                                    // Handle other types (numbers, booleans, etc.)
+                                    cleanData[key] = value;
+                                    console.log(`Added other field ${key}:`, value);
+                                }
+                            } catch (fieldError) {
+                                console.error(`Error processing field ${key}:`, fieldError);
+                                // Skip this field if there's an error
+                            }
+                        });
+                    } catch (cleanDataError) {
+                        console.error('Error in cleanData processing:', cleanDataError);
+                        throw new Error('Error processing form data: ' + cleanDataError.message);
+                    }
+                    
+                    console.log('Attempting to save notulen to Supabase:', cleanData);
+                    const savedNotulen = await window.notulenAPI.addNotulen(cleanData);
+                    console.log('Successfully saved to Supabase:', savedNotulen);
+                    
+                    showNotification('Notulen berhasil disimpan ke database!', 'success');
+                    resetForm();
+                    
+                    // Force reload from database
+                    console.log('Reloading data from database...');
+                    await loadDashboardData();
+                    
+                    // Switch to list tab to show updated data
+                    const listTab = document.getElementById('list-tab');
+                    if (listTab) {
+                        listTab.click();
+                    }
+                } catch (dbError) {
+                    console.error('Error saving notulen to Supabase:', dbError);
+                    console.error('Error details:', {
+                        message: dbError.message,
+                        code: dbError.code,
+                        details: dbError.details,
+                        hint: dbError.hint,
+                        stack: dbError.stack
+                    });
+                    
+                    // Tampilkan error yang lebih user-friendly
+                    let errorMessage = 'GAGAL menyimpan ke database! ';
+                    if (dbError.message.includes('trim is not a function')) {
+                        errorMessage += 'Error: Ada masalah dengan data form. Silakan refresh halaman dan coba lagi.';
+                    } else if (dbError.message.includes('RLS')) {
+                        errorMessage += 'Error: Pastikan RLS sudah dinonaktifkan di Supabase.';
+                    } else if (dbError.message.includes('Error processing form data')) {
+                        errorMessage += 'Error: Masalah dengan data form. Silakan isi ulang form.';
+                    } else {
+                        errorMessage += 'Error: ' + dbError.message;
+                    }
+                    
+                    showNotification(errorMessage, 'error');
+                    
+                    // Log detailed error for debugging
+                    console.error('Full error object:', dbError);
+                    console.error('Error stack:', dbError.stack);
+                    
+                    // TIDAK ADA FALLBACK LOKAL - hanya database
+                    console.log('Tidak ada fallback lokal. Data harus tersimpan di database.');
+                    resetForm();
+                }
+
+            } catch (error) {
+                console.error('Error saving notulen:', error);
+                showNotification('Error saving notulen: ' + error.message, 'error');
+            }
+        });
+
+        function resetForm() {
+            document.getElementById('notulenForm').reset();
+            selectedImages = [];
+            updateImagePreview();
+        }
+
+        function loadNotulenTable() {
+            const tbody = document.getElementById('notulenTable');
+            tbody.innerHTML = '';
+
+            notulenData.forEach(notulen => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${notulen.judul_rapat}</td>
+                    <td>${formatDate(notulen.tanggal_rapat)}</td>
+                    <td>${notulen.waktu_mulai} - ${notulen.waktu_selesai}</td>
+                    <td>${notulen.pemimpin_rapat}</td>
+                    <td>${notulen.lokasi}</td>
+                    <td>
+                        <span class="badge bg-info">${notulen.peserta_rapat ? notulen.peserta_rapat.split(',').length : 0} peserta</span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-primary me-1" onclick="viewNotulen(${notulen.id})" title="Lihat Detail">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-success me-1" onclick="exportNotulenToPDF(${notulen.id})" title="Export ke PDF">
+                            <i class="fas fa-file-pdf"></i>
+                        </button>
+                        <button class="btn btn-sm btn-warning me-1" onclick="editNotulen(${notulen.id})" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteNotulen(${notulen.id})" title="Hapus">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function viewNotulen(id) {
+            const notulen = notulenData.find(n => n.id == id);
+            if (!notulen) return;
+
+            const content = document.getElementById('viewNotulenContent');
+            content.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Judul Rapat</h6>
+                        <p class="fw-bold">${notulen.judul_rapat}</p>
+                        
+                        <h6>Tanggal & Waktu</h6>
+                        <p>${formatDate(notulen.tanggal_rapat)} | ${notulen.waktu_mulai} - ${notulen.waktu_selesai}</p>
+                        
+                        <h6>Lokasi</h6>
+                        <p>${notulen.lokasi}</p>
+                        
+                        <h6>Pemimpin Rapat</h6>
+                        <p>${notulen.pemimpin_rapat}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Peserta Rapat</h6>
+                        <div class="participant-tags">
+                            ${notulen.peserta_rapat ? notulen.peserta_rapat.split(',').map(p => `<span class="participant-tag">${p.trim()}</span>`).join('') : 'Tidak ada peserta'}
+                        </div>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="row">
+                    <div class="col-12">
+                        <h6>Agenda Pembahasan</h6>
+                        <div class="agenda-content">
+                            ${notulen.agenda_pembahasan ? notulen.agenda_pembahasan.split('\n').map(item => `<div class="agenda-item">${item}</div>`).join('') : 'Tidak ada agenda'}
+                        </div>
+                    </div>
+                </div>
+                
+                ${notulen.action_items ? `
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6>Action Items</h6>
+                        <div class="action-content">
+                            ${notulen.action_items.split('\n').map(item => `<div class="action-item">${item}</div>`).join('')}
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+                
+                ${notulen.keputusan_diambil ? `
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6>Keputusan yang Diambil</h6>
+                        <div class="decision-content">
+                            ${notulen.keputusan_diambil.split('\n').map(item => `<div class="decision-item">${item}</div>`).join('')}
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+                
+                ${notulen.gambar_notulen && notulen.gambar_notulen.length > 0 ? `
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6>Gambar Notulen</h6>
+                        <div class="image-gallery">
+                            ${notulen.gambar_notulen.map((img, index) => `
+                                <div class="image-gallery-item">
+                                    <img src="${img.url || img.data}" alt="${img.name}" onclick="openImageModal('${img.url || img.data}', '${img.name}')" style="cursor: pointer;">
+                                    <div class="image-caption">${img.name}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+            `;
+
+            const modal = new bootstrap.Modal(document.getElementById('viewNotulenModal'));
+            modal.show();
+        }
+
+        function editNotulen(id) {
+            // Implementation for editing notulen
+            showNotification('Fitur edit akan segera tersedia', 'info');
+        }
+
+        async function deleteNotulen(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus notulen ini?')) {
+                try {
+                    console.log('Deleting notulen with ID:', id);
+                    
+                    // Try to delete from database
+                    await window.notulenAPI.deleteNotulen(id);
+                    console.log('Successfully deleted from database');
+                    showNotification('Notulen berhasil dihapus dari database!', 'success');
+                    
+                    // Reload all data from database
+                    await loadDashboardData();
+                    
+                } catch (error) {
+                    console.error('Error deleting from database:', error);
+                    showNotification('Gagal menghapus dari database: ' + error.message, 'error');
+                    
+                    // Fallback to local deletion
+                    notulenData = notulenData.filter(n => n.id != id);
+                    showNotification('Notulen berhasil dihapus (local)!', 'success');
+                    
+                    // Update UI
+                    updateStatistics();
+                    loadRecentNotulen();
+                    loadNotulenTable();
+                }
+            }
+        }
+
+        function searchNotulen() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filteredData = notulenData.filter(notulen => 
+                notulen.judul_rapat.toLowerCase().includes(searchTerm) ||
+                notulen.pemimpin_rapat.toLowerCase().includes(searchTerm) ||
+                notulen.lokasi.toLowerCase().includes(searchTerm)
+            );
+            
+            // Update table with filtered data
+            const tbody = document.getElementById('notulenTable');
+            tbody.innerHTML = '';
+            
+            filteredData.forEach(notulen => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${notulen.judul_rapat}</td>
+                    <td>${formatDate(notulen.tanggal_rapat)}</td>
+                    <td>${notulen.waktu_mulai} - ${notulen.waktu_selesai}</td>
+                    <td>${notulen.pemimpin_rapat}</td>
+                    <td>${notulen.lokasi}</td>
+                    <td>
+                        <span class="badge bg-info">${notulen.peserta_rapat ? notulen.peserta_rapat.split(',').length : 0} peserta</span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-primary me-1" onclick="viewNotulen(${notulen.id})" title="Lihat Detail">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-success me-1" onclick="exportNotulenToPDF(${notulen.id})" title="Export ke PDF">
+                            <i class="fas fa-file-pdf"></i>
+                        </button>
+                        <button class="btn btn-sm btn-warning me-1" onclick="editNotulen(${notulen.id})" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteNotulen(${notulen.id})" title="Hapus">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        async function performSearch() {
+            const judul = document.getElementById('searchJudul').value;
+            const tanggal = document.getElementById('searchTanggal').value;
+            const pemimpin = document.getElementById('searchPemimpin').value;
+            
+            try {
+                // Use NotulenAPI for search
+                const searchTerm = judul || pemimpin;
+                const filters = {
+                    tanggal: tanggal || null,
+                    pemimpin: pemimpin || null
+                };
+                
+                const filteredData = await window.notulenAPI.searchNotulen(searchTerm, filters);
+                displaySearchResults(filteredData);
+            } catch (error) {
+                console.error('Error searching notulen:', error);
+                // Fallback to local search
+                const filteredData = notulenData.filter(notulen => {
+                    const judulMatch = !judul || notulen.judul_rapat.toLowerCase().includes(judul.toLowerCase());
+                    const tanggalMatch = !tanggal || notulen.tanggal_rapat === tanggal;
+                    const pemimpinMatch = !pemimpin || notulen.pemimpin_rapat.toLowerCase().includes(pemimpin.toLowerCase());
+                    
+                    return judulMatch && tanggalMatch && pemimpinMatch;
+                });
+                displaySearchResults(filteredData);
+            }
+        }
+
+        function displaySearchResults(results) {
+            const container = document.getElementById('searchResults');
+            container.innerHTML = '';
+            
+            if (results.length === 0) {
+                container.innerHTML = '<div class="alert alert-info">Tidak ada notulen yang ditemukan</div>';
+                return;
+            }
+            
+            results.forEach(notulen => {
+                const card = document.createElement('div');
+                card.className = 'card mb-3';
+                card.innerHTML = `
+                    <div class="card-body">
+                        <h6 class="card-title">${notulen.judul_rapat}</h6>
+                        <p class="card-text">
+                            <strong>Tanggal:</strong> ${formatDate(notulen.tanggal_rapat)}<br>
+                            <strong>Waktu:</strong> ${notulen.waktu_mulai} - ${notulen.waktu_selesai}<br>
+                            <strong>Pemimpin:</strong> ${notulen.pemimpin_rapat}<br>
+                            <strong>Lokasi:</strong> ${notulen.lokasi}
+                        </p>
+                        <button class="btn btn-sm btn-primary" onclick="viewNotulen(${notulen.id})">
+                            <i class="fas fa-eye me-1"></i>Lihat Detail
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('id-ID', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            const messageEl = document.getElementById('notificationMessage');
+            
+            messageEl.textContent = message;
+            notification.style.display = 'block';
+            notification.classList.add('show');
+            
+            const alertClass = type === 'success' ? 'alert-success' : 
+                              type === 'error' ? 'alert-danger' : 
+                              type === 'warning' ? 'alert-warning' : 'alert-info';
+            
+            const alertEl = notification.querySelector('.alert');
+            alertEl.className = `alert alert-dismissible fade show ${alertClass}`;
+            
+            setTimeout(() => {
+                hideNotification();
+            }, 5000);
+        }
+
+        function hideNotification() {
+            const notification = document.getElementById('notification');
+            notification.classList.remove('show');
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 300);
+        }
+
+        function logout() {
+            sessionStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+
+        // Image modal functions
+        function openImageModal(imageSrc, imageName) {
+            const modal = document.createElement('div');
+            modal.className = 'image-modal';
+            modal.innerHTML = `
+                <div class="image-modal-close" onclick="closeImageModal()">
+                    <i class="fas fa-times"></i>
+                </div>
+                <img src="${imageSrc}" alt="${imageName}">
+            `;
+            document.body.appendChild(modal);
+            
+            // Close on background click
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeImageModal();
+                }
+            });
+        }
+
+        function closeImageModal() {
+            const modal = document.querySelector('.image-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        // Test database connection manually
+        async function testDatabaseConnection() {
+            try {
+                showNotification('Testing database connection...', 'info');
+                
+                console.log('Manual database test started...');
+                console.log('Supabase client available:', !!window.supabase);
+                console.log('NotulenAPI available:', !!window.notulenAPI);
+                
+                // Test 1: Basic connection
+                const { data: testData, error: testError } = await window.supabase
+                    .from('notulen_rapat')
+                    .select('*')
+                    .limit(1);
+                
+                if (testError) {
+                    console.error('Database test failed:', testError);
+                    showNotification('Database test GAGAL: ' + testError.message, 'error');
+                    return;
+                }
+                
+                console.log('Database test successful:', testData);
+                showNotification('Database test BERHASIL!', 'success');
+                
+                // Test 2: Try to insert test data with minimal required fields
+                const testInsert = {
+                    judul_rapat: 'Test Connection - ' + new Date().toISOString(),
+                    lokasi: 'Test Lokasi',
+                    tanggal_rapat: new Date().toISOString().split('T')[0],
+                    waktu_mulai: '09:00',
+                    waktu_selesai: '10:00',
+                    pemimpin_rapat: 'Test Admin',
+                    peserta_rapat: 'Test Peserta',
+                    agenda_pembahasan: 'Test agenda',
+                    action_items: 'Test action',
+                    keputusan_diambil: 'Test keputusan'
+                };
+                
+                console.log('Testing insert...', testInsert);
+                const { data: insertData, error: insertError } = await window.supabase
+                    .from('notulen_rapat')
+                    .insert([testInsert])
+                    .select();
+                
+                if (insertError) {
+                    console.error('Insert test failed:', insertError);
+                    showNotification('Insert test GAGAL: ' + insertError.message, 'error');
+                } else {
+                    console.log('Insert test successful:', insertData);
+                    showNotification('Insert test BERHASIL! Data tersimpan di database.', 'success');
+                }
+                
+            } catch (error) {
+                console.error('Database test error:', error);
+                showNotification('Database test error: ' + error.message, 'error');
+            }
+        }
+
+        // ========================================
+        // FUNGSI EXPORT PDF
+        // ========================================
+
+        // Export single notulen to PDF
+        async function exportNotulenToPDF(notulenId) {
+            try {
+                console.log('Exporting notulen to PDF:', notulenId);
+                
+                // Get notulen data
+                const notulen = await window.notulenAPI.getNotulenById(notulenId);
+                if (!notulen) {
+                    showNotification('Notulen tidak ditemukan!', 'error');
+                    return;
+                }
+
+                // Create PDF
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Set font
+                doc.setFont('helvetica');
+                
+                // Header
+                doc.setFontSize(20);
+                doc.setFont('helvetica', 'bold');
+                doc.text('NOTULEN RAPAT', 105, 20, { align: 'center' });
+                
+                // Line separator
+                doc.setLineWidth(0.5);
+                doc.line(20, 25, 190, 25);
+                
+                // Content
+                let yPosition = 35;
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'normal');
+                
+                // Judul Rapat
+                doc.setFont('helvetica', 'bold');
+                doc.text('Judul Rapat:', 20, yPosition);
+                doc.setFont('helvetica', 'normal');
+                doc.text(notulen.judul_rapat || '-', 60, yPosition);
+                yPosition += 10;
+                
+                // Lokasi
+                doc.setFont('helvetica', 'bold');
+                doc.text('Lokasi:', 20, yPosition);
+                doc.setFont('helvetica', 'normal');
+                doc.text(notulen.lokasi || '-', 60, yPosition);
+                yPosition += 10;
+                
+                // Tanggal & Waktu
+                doc.setFont('helvetica', 'bold');
+                doc.text('Tanggal:', 20, yPosition);
+                doc.setFont('helvetica', 'normal');
+                doc.text(notulen.tanggal_rapat || '-', 60, yPosition);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Waktu:', 120, yPosition);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`${notulen.waktu_mulai || '-'} - ${notulen.waktu_selesai || '-'}`, 150, yPosition);
+                yPosition += 10;
+                
+                // Pemimpin Rapat
+                doc.setFont('helvetica', 'bold');
+                doc.text('Pemimpin Rapat:', 20, yPosition);
+                doc.setFont('helvetica', 'normal');
+                doc.text(notulen.pemimpin_rapat || '-', 60, yPosition);
+                yPosition += 10;
+                
+                // Peserta Rapat
+                doc.setFont('helvetica', 'bold');
+                doc.text('Peserta Rapat:', 20, yPosition);
+                doc.setFont('helvetica', 'normal');
+                const peserta = notulen.peserta_rapat || '-';
+                const pesertaLines = doc.splitTextToSize(peserta, 150);
+                doc.text(pesertaLines, 60, yPosition);
+                yPosition += pesertaLines.length * 5 + 5;
+                
+                // Agenda Pembahasan
+                doc.setFont('helvetica', 'bold');
+                doc.text('Agenda Pembahasan:', 20, yPosition);
+                doc.setFont('helvetica', 'normal');
+                const agenda = notulen.agenda_pembahasan || '-';
+                const agendaLines = doc.splitTextToSize(agenda, 150);
+                doc.text(agendaLines, 60, yPosition);
+                yPosition += agendaLines.length * 5 + 5;
+                
+                // Action Items
+                doc.setFont('helvetica', 'bold');
+                doc.text('Action Items:', 20, yPosition);
+                doc.setFont('helvetica', 'normal');
+                const actionItems = notulen.action_items || '-';
+                const actionLines = doc.splitTextToSize(actionItems, 150);
+                doc.text(actionLines, 60, yPosition);
+                yPosition += actionLines.length * 5 + 5;
+                
+                // Keputusan
+                doc.setFont('helvetica', 'bold');
+                doc.text('Keputusan:', 20, yPosition);
+                doc.setFont('helvetica', 'normal');
+                const keputusan = notulen.keputusan_diambil || '-';
+                const keputusanLines = doc.splitTextToSize(keputusan, 150);
+                doc.text(keputusanLines, 60, yPosition);
+                yPosition += keputusanLines.length * 5 + 5;
+                
+                // Footer
+                yPosition += 10;
+                doc.setLineWidth(0.5);
+                doc.line(20, yPosition, 190, yPosition);
+                yPosition += 10;
+                
+                doc.setFontSize(10);
+                doc.text(`Dibuat pada: ${new Date().toLocaleString('id-ID')}`, 20, yPosition);
+                doc.text(`Halaman 1`, 190, yPosition, { align: 'right' });
+                
+                // Save PDF
+                const fileName = `Notulen_${notulen.judul_rapat?.replace(/[^a-zA-Z0-9]/g, '_') || 'Rapat'}_${new Date().toISOString().split('T')[0]}.pdf`;
+                doc.save(fileName);
+                
+                showNotification('PDF berhasil diunduh!', 'success');
+                
+            } catch (error) {
+                console.error('Error exporting PDF:', error);
+                showNotification('Error export PDF: ' + error.message, 'error');
+            }
+        }
+
+        // Export all notulen to PDF
+        async function exportAllNotulenToPDF() {
+            try {
+                console.log('Exporting all notulen to PDF');
+                
+                // Get all notulen data
+                const notulenList = await window.notulenAPI.getNotulen();
+                if (!notulenList || notulenList.length === 0) {
+                    showNotification('Tidak ada notulen untuk diexport!', 'warning');
+                    return;
+                }
+
+                // Create PDF
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Set font
+                doc.setFont('helvetica');
+                
+                // Header
+                doc.setFontSize(20);
+                doc.setFont('helvetica', 'bold');
+                doc.text('DAFTAR NOTULEN RAPAT', 105, 20, { align: 'center' });
+                
+                // Line separator
+                doc.setLineWidth(0.5);
+                doc.line(20, 25, 190, 25);
+                
+                // Table header
+                let yPosition = 35;
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'bold');
+                
+                // Table headers
+                doc.text('No', 20, yPosition);
+                doc.text('Judul Rapat', 30, yPosition);
+                doc.text('Lokasi', 100, yPosition);
+                doc.text('Tanggal', 140, yPosition);
+                doc.text('Pemimpin', 170, yPosition);
+                
+                // Line under header
+                yPosition += 5;
+                doc.setLineWidth(0.3);
+                doc.line(20, yPosition, 190, yPosition);
+                yPosition += 10;
+                
+                // Table content
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(10);
+                
+                notulenList.forEach((notulen, index) => {
+                    if (yPosition > 270) {
+                        doc.addPage();
+                        yPosition = 20;
+                    }
+                    
+                    doc.text((index + 1).toString(), 20, yPosition);
+                    doc.text(notulen.judul_rapat || '-', 30, yPosition);
+                    doc.text(notulen.lokasi || '-', 100, yPosition);
+                    doc.text(notulen.tanggal_rapat || '-', 140, yPosition);
+                    doc.text(notulen.pemimpin_rapat || '-', 170, yPosition);
+                    
+                    yPosition += 8;
+                });
+                
+                // Footer
+                yPosition += 10;
+                doc.setLineWidth(0.5);
+                doc.line(20, yPosition, 190, yPosition);
+                yPosition += 10;
+                
+                doc.setFontSize(10);
+                doc.text(`Total: ${notulenList.length} notulen`, 20, yPosition);
+                doc.text(`Dibuat pada: ${new Date().toLocaleString('id-ID')}`, 20, yPosition + 5);
+                doc.text(`Halaman 1`, 190, yPosition, { align: 'right' });
+                
+                // Save PDF
+                const fileName = `Daftar_Notulen_${new Date().toISOString().split('T')[0]}.pdf`;
+                doc.save(fileName);
+                
+                showNotification(`PDF berhasil diunduh! (${notulenList.length} notulen)`, 'success');
+                
+            } catch (error) {
+                console.error('Error exporting all PDF:', error);
+                showNotification('Error export PDF: ' + error.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

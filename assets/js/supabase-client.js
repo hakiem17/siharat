@@ -255,11 +255,259 @@ class ElectricityAPI {
     }
 }
 
+// Notulen Management API Functions
+class NotulenAPI {
+    constructor() {
+        this.supabase = supabase;
+    }
+
+    // Get all notulen
+    async getNotulen(limit = 50) {
+        try {
+            const { data, error } = await this.supabase
+                .from('notulen_rapat')
+                .select('*')
+                .order('tanggal_rapat', { ascending: false })
+                .limit(limit);
+            
+            if (error) {
+                console.error('Supabase error:', error);
+                // Return empty array if table doesn't exist
+                if (error.code === 'PGRST116' || error.message.includes('relation "notulen_rapat" does not exist')) {
+                    console.warn('Table notulen_rapat does not exist, returning empty array');
+                    return [];
+                }
+                throw error;
+            }
+            
+            return data || [];
+        } catch (error) {
+            console.error('Error fetching notulen:', error);
+            return [];
+        }
+    }
+
+    // Get notulen by ID
+    async getNotulenById(id) {
+        try {
+            const { data, error } = await this.supabase
+                .from('notulen_rapat')
+                .select('*')
+                .eq('id', id)
+                .single();
+            
+            if (error) throw error;
+            return data;
+        } catch (error) {
+            console.error('Error fetching notulen by ID:', error);
+            throw error;
+        }
+    }
+
+    // Add new notulen
+    async addNotulen(notulenData) {
+        try {
+            console.log('NotulenAPI: Attempting to insert notulen:', notulenData);
+            
+            // Handle image uploads if present
+            let imageData = [];
+            if (notulenData.gambar_notulen && notulenData.gambar_notulen.length > 0) {
+                console.log('Uploading images to Supabase Storage...');
+                imageData = await this.uploadImages(notulenData.gambar_notulen);
+                console.log('Images uploaded successfully:', imageData);
+            }
+            
+            // Remove created_by if it's not a valid UUID to avoid RLS issues
+            const cleanData = { ...notulenData };
+            if (cleanData.created_by && !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(cleanData.created_by)) {
+                console.log('Invalid UUID for created_by, removing it');
+                delete cleanData.created_by;
+            }
+            
+            // Replace base64 images with storage URLs
+            cleanData.gambar_notulen = imageData;
+            
+            const { data, error } = await this.supabase
+                .from('notulen_rapat')
+                .insert([cleanData])
+                .select();
+            
+            if (error) {
+                console.error('Supabase insert error:', error);
+                throw error;
+            }
+            
+            console.log('NotulenAPI: Successfully inserted:', data);
+            return data[0];
+        } catch (error) {
+            console.error('Error adding notulen:', error);
+            throw error;
+        }
+    }
+
+    // Upload images to Supabase Storage
+    async uploadImages(images) {
+        const uploadedImages = [];
+        
+        for (let i = 0; i < images.length; i++) {
+            const image = images[i];
+            const fileName = `${Date.now()}-${i}-${image.name}`;
+            const filePath = `notulen-images/${fileName}`;
+            
+            try {
+                // Convert base64 to blob
+                const response = await fetch(image.data);
+                const blob = await response.blob();
+                
+                // Upload to Supabase Storage
+                const { data, error } = await this.supabase.storage
+                    .from('notulen-images')
+                    .upload(filePath, blob, {
+                        contentType: image.type,
+                        upsert: false
+                    });
+                
+                if (error) {
+                    console.error('Error uploading image:', error);
+                    throw error;
+                }
+                
+                // Get public URL
+                const { data: urlData } = this.supabase.storage
+                    .from('notulen-images')
+                    .getPublicUrl(filePath);
+                
+                uploadedImages.push({
+                    name: image.name,
+                    path: filePath,
+                    url: urlData.publicUrl,
+                    size: blob.size,
+                    type: image.type
+                });
+                
+                console.log(`Image ${i + 1} uploaded successfully:`, fileName);
+                
+            } catch (error) {
+                console.error(`Error uploading image ${i + 1}:`, error);
+                throw error;
+            }
+        }
+        
+        return uploadedImages;
+    }
+
+    // Update notulen
+    async updateNotulen(id, notulenData) {
+        try {
+            const { data, error } = await this.supabase
+                .from('notulen_rapat')
+                .update(notulenData)
+                .eq('id', id)
+                .select();
+            
+            if (error) throw error;
+            return data[0];
+        } catch (error) {
+            console.error('Error updating notulen:', error);
+            throw error;
+        }
+    }
+
+    // Delete notulen
+    async deleteNotulen(id) {
+        try {
+            const { data, error } = await this.supabase
+                .from('notulen_rapat')
+                .delete()
+                .eq('id', id)
+                .select();
+            
+            if (error) throw error;
+            return data[0];
+        } catch (error) {
+            console.error('Error deleting notulen:', error);
+            throw error;
+        }
+    }
+
+    // Search notulen
+    async searchNotulen(searchTerm, filters = {}) {
+        try {
+            let query = this.supabase
+                .from('notulen_rapat')
+                .select('*');
+
+            // Apply text search
+            if (searchTerm) {
+                query = query.or(`judul_rapat.ilike.%${searchTerm}%,pemimpin_rapat.ilike.%${searchTerm}%,lokasi.ilike.%${searchTerm}%`);
+            }
+
+            // Apply filters
+            if (filters.tanggal) {
+                query = query.eq('tanggal_rapat', filters.tanggal);
+            }
+
+            if (filters.pemimpin) {
+                query = query.ilike('pemimpin_rapat', `%${filters.pemimpin}%`);
+            }
+
+            query = query.order('tanggal_rapat', { ascending: false });
+
+            const { data, error } = await query;
+            
+            if (error) throw error;
+            return data || [];
+        } catch (error) {
+            console.error('Error searching notulen:', error);
+            return [];
+        }
+    }
+
+    // Get notulen statistics
+    async getNotulenStats() {
+        try {
+            const { data, error } = await this.supabase
+                .from('notulen_rapat')
+                .select('tanggal_rapat, peserta_rapat');
+            
+            if (error) throw error;
+            
+            const today = new Date().toISOString().split('T')[0];
+            const thisMonth = new Date().getMonth();
+            const thisYear = new Date().getFullYear();
+            
+            const stats = {
+                total: data.length,
+                bulan_ini: data.filter(notulen => {
+                    const notulenDate = new Date(notulen.tanggal_rapat);
+                    return notulenDate.getMonth() === thisMonth && notulenDate.getFullYear() === thisYear;
+                }).length,
+                hari_ini: data.filter(notulen => notulen.tanggal_rapat === today).length,
+                total_peserta: data.reduce((total, notulen) => {
+                    return total + (notulen.peserta_rapat ? notulen.peserta_rapat.split(',').length : 0);
+                }, 0)
+            };
+            
+            return stats;
+        } catch (error) {
+            console.error('Error fetching notulen stats:', error);
+            return {
+                total: 0,
+                bulan_ini: 0,
+                hari_ini: 0,
+                total_peserta: 0
+            };
+        }
+    }
+}
+
 // Initialize API
 const electricityAPI = new ElectricityAPI();
+const notulenAPI = new NotulenAPI();
 
 // Export for use in other files
 window.supabase = supabase;
 window.electricityAPI = electricityAPI;
+window.notulenAPI = notulenAPI;
 
-console.log('Supabase client and Electricity API initialized');
+console.log('Supabase client, Electricity API, and Notulen API initialized');

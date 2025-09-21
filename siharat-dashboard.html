@@ -843,10 +843,10 @@
                     pageTitle.textContent = 'Notulen Rapat';
                     setTimeout(() => {
                         contentArea.innerHTML = `
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle me-2"></i>
-                                Fitur notulen rapat akan segera tersedia.
-                            </div>
+                            <iframe src="dashboard-notulen.html" class="content-iframe" 
+                                    onload="this.style.opacity='1'" 
+                                    style="opacity:0; transition: opacity 0.3s ease;">
+                            </iframe>
                         `;
                     }, 500);
                     break;
