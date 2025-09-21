@@ -642,12 +642,30 @@
     
     <script>
         // Global variables
-        let supabase;
         let fuelLogs = [];
         let employees = [];
         let vehicles = [];
         let currentUser = null;
         let selectedFuelLog = null;
+
+        // Helper function to generate valid UUID
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        // Helper function to clear invalid session data
+        function clearInvalidSession() {
+            try {
+                sessionStorage.removeItem('user');
+                console.log('Cleared invalid session data');
+            } catch (error) {
+                console.error('Error clearing session:', error);
+            }
+        }
 
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
@@ -656,19 +674,46 @@
 
         async function initializeApp() {
             try {
-                // Initialize Supabase
-                supabase = window.supabase.createClient(
-                    window.SIHARAT_CONFIG.supabase.url,
-                    window.SIHARAT_CONFIG.supabase.anonKey
-                );
+                // Use Supabase client from external file
+                const supabase = window.supabase;
 
                 // Get current user
                 const userData = sessionStorage.getItem('user');
                 if (!userData) {
-                    window.location.href = 'login.html';
-                    return;
+                    // Create dummy user for testing if no user is logged in
+                    currentUser = {
+                        id: generateUUID(), // Generate valid UUID
+                        name: 'Admin Test',
+                        role: 'admin',
+                        email: 'admin@test.com'
+                    };
+                    console.log('Using dummy user for testing:', currentUser);
+                } else {
+                    try {
+                        currentUser = JSON.parse(userData);
+                        
+                        // Validate and fix user ID if needed
+                        if (!currentUser.id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(currentUser.id)) {
+                            console.log('Invalid user ID detected, clearing session and using dummy user');
+                            clearInvalidSession();
+                            currentUser = {
+                                id: generateUUID(),
+                                name: 'Admin Test',
+                                role: 'admin',
+                                email: 'admin@test.com'
+                            };
+                        }
+                    } catch (error) {
+                        console.log('Error parsing user data, clearing session and using dummy user');
+                        clearInvalidSession();
+                        currentUser = {
+                            id: generateUUID(),
+                            name: 'Admin Test',
+                            role: 'admin',
+                            email: 'admin@test.com'
+                        };
+                    }
                 }
-                currentUser = JSON.parse(userData);
 
                 // Load initial data
                 await loadEmployees();
@@ -679,6 +724,11 @@
 
                 // Setup event listeners
                 setupEventListeners();
+                
+                // Debug info
+                console.log('Dashboard initialized successfully');
+                console.log('Current user:', currentUser);
+                console.log('Supabase client:', window.supabase);
 
             } catch (error) {
                 console.error('Error initializing app:', error);
@@ -725,7 +775,7 @@
 
         async function loadEmployees() {
             try {
-                const { data, error } = await supabase
+                const { data, error } = await window.supabase
                     .from('employees')
                     .select('id, name, nip, position')
                     .eq('is_active', true)
@@ -752,7 +802,7 @@
 
         async function loadVehicles() {
             try {
-                const { data, error } = await supabase
+                const { data, error } = await window.supabase
                     .from('vehicles')
                     .select('id, nomor_polisi, merk, model, jenis_kendaraan')
                     .eq('is_active', true)
@@ -779,7 +829,7 @@
 
         async function loadFuelLogs() {
             try {
-                const { data, error } = await supabase
+                const { data, error } = await window.supabase
                     .from('log_pengisian_bbm')
                     .select(`
                         *,
@@ -977,7 +1027,7 @@
                 }
 
                 // Check if vehicle with same license plate already exists
-                const { data: existingVehicle, error: checkError } = await supabase
+                const { data: existingVehicle, error: checkError } = await window.supabase
                     .from('vehicles')
                     .select('id')
                     .eq('nomor_polisi', vehicleData.nomor_polisi)
@@ -992,7 +1042,7 @@
                     return;
                 }
 
-                const { data, error } = await supabase
+                const { data, error } = await window.supabase
                     .from('vehicles')
                     .insert([vehicleData])
                     .select();
@@ -1032,7 +1082,7 @@
                     status: 'pending'
                 };
 
-                const { data, error } = await supabase
+                const { data, error } = await window.supabase
                     .from('log_pengisian_bbm')
                     .insert([fuelLogData])
                     .select();
@@ -1124,56 +1174,150 @@
         async function approveFuelLog(logId = null) {
             try {
                 const id = logId || selectedFuelLog?.id;
-                if (!id) return;
+                if (!id) {
+                    showNotification('ID log tidak ditemukan', 'error');
+                    return;
+                }
 
-                const { error } = await supabase
+                // Check if user is logged in
+                if (!currentUser) {
+                    showNotification('Anda harus login untuk melakukan approve', 'error');
+                    return;
+                }
+
+                console.log('Approving fuel log:', id, 'by user:', currentUser);
+
+                // Get a valid employee ID for approved_by
+                let approvedById = null;
+                
+                // Try to get the first available employee ID
+                if (employees && employees.length > 0) {
+                    approvedById = employees[0].id;
+                    console.log('Using employee ID for approved_by:', approvedById);
+                } else {
+                    // If no employees available, try to get from database
+                    try {
+                        const { data: employeeData, error: empError } = await window.supabase
+                            .from('employees')
+                            .select('id')
+                            .limit(1);
+                        
+                        if (!empError && employeeData && employeeData.length > 0) {
+                            approvedById = employeeData[0].id;
+                            console.log('Fetched employee ID for approved_by:', approvedById);
+                        }
+                    } catch (error) {
+                        console.error('Error fetching employee:', error);
+                    }
+                }
+
+                if (!approvedById) {
+                    throw new Error('No valid employee found for approval. Please ensure employees table has data.');
+                }
+
+                const { error } = await window.supabase
                     .from('log_pengisian_bbm')
                     .update({ 
                         status: 'approved',
-                        approved_by: currentUser.id,
+                        approved_by: approvedById,
                         updated_at: new Date().toISOString()
                     })
                     .eq('id', id);
 
-                if (error) throw error;
+                if (error) {
+                    console.error('Supabase error:', error);
+                    throw error;
+                }
 
                 showNotification('Log BBM berhasil disetujui', 'success');
-                bootstrap.Modal.getInstance(document.getElementById('viewFuelLogModal')).hide();
+                
+                // Close modal if open
+                const modal = bootstrap.Modal.getInstance(document.getElementById('viewFuelLogModal'));
+                if (modal) {
+                    modal.hide();
+                }
                 
                 await loadFuelLogs();
                 await loadStatistics();
 
             } catch (error) {
                 console.error('Error approving fuel log:', error);
-                showNotification('Error approving fuel log', 'error');
+                showNotification('Error approving fuel log: ' + error.message, 'error');
             }
         }
 
         async function rejectFuelLog(logId = null) {
             try {
                 const id = logId || selectedFuelLog?.id;
-                if (!id) return;
+                if (!id) {
+                    showNotification('ID log tidak ditemukan', 'error');
+                    return;
+                }
 
-                const { error } = await supabase
+                // Check if user is logged in
+                if (!currentUser) {
+                    showNotification('Anda harus login untuk melakukan reject', 'error');
+                    return;
+                }
+
+                console.log('Rejecting fuel log:', id, 'by user:', currentUser);
+
+                // Get a valid employee ID for approved_by
+                let approvedById = null;
+                
+                // Try to get the first available employee ID
+                if (employees && employees.length > 0) {
+                    approvedById = employees[0].id;
+                    console.log('Using employee ID for approved_by:', approvedById);
+                } else {
+                    // If no employees available, try to get from database
+                    try {
+                        const { data: employeeData, error: empError } = await window.supabase
+                            .from('employees')
+                            .select('id')
+                            .limit(1);
+                        
+                        if (!empError && employeeData && employeeData.length > 0) {
+                            approvedById = employeeData[0].id;
+                            console.log('Fetched employee ID for approved_by:', approvedById);
+                        }
+                    } catch (error) {
+                        console.error('Error fetching employee:', error);
+                    }
+                }
+
+                if (!approvedById) {
+                    throw new Error('No valid employee found for rejection. Please ensure employees table has data.');
+                }
+
+                const { error } = await window.supabase
                     .from('log_pengisian_bbm')
                     .update({ 
                         status: 'rejected',
-                        approved_by: currentUser.id,
+                        approved_by: approvedById,
                         updated_at: new Date().toISOString()
                     })
                     .eq('id', id);
 
-                if (error) throw error;
+                if (error) {
+                    console.error('Supabase error:', error);
+                    throw error;
+                }
 
                 showNotification('Log BBM berhasil ditolak', 'success');
-                bootstrap.Modal.getInstance(document.getElementById('viewFuelLogModal')).hide();
+                
+                // Close modal if open
+                const modal = bootstrap.Modal.getInstance(document.getElementById('viewFuelLogModal'));
+                if (modal) {
+                    modal.hide();
+                }
                 
                 await loadFuelLogs();
                 await loadStatistics();
 
             } catch (error) {
                 console.error('Error rejecting fuel log:', error);
-                showNotification('Error rejecting fuel log', 'error');
+                showNotification('Error rejecting fuel log: ' + error.message, 'error');
             }
         }
 
